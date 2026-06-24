@@ -207,3 +207,41 @@ reflects the trained policy on an open board — Phase 9 sensitivity explores Th
 favourable regimes.
 
 **Gate:** ruff 0 errors; 139 passed; **coverage 96.0%**. All files ≤ 150 LOC.
+
+---
+
+## 2026-06-25 — Phase 9: Research notebook + graphs + cost ✅
+
+**Done**
+- `learning/experiments.py` (rollouts, `eval_stats`, `visibility_coverage`) and
+  `learning/sensitivity.py` (`q_vs_heuristic`, `sensitivity_oat`) — tested helpers.
+- `scripts/build_notebook.py` builds `notebooks/analysis.ipynb`; executed end-to-end
+  via `nbconvert` (**0 errors**, 6 code cells with outputs).
+- `assets/`: learning_curve, q_vs_heuristic, sensitivity (grid/epsilon/gamma/
+  max_barriers), vision_coverage, token_cost.
+- **Findings:** cop win-rate 1.0 → 0.4 as grid grows 4→6 (Thief evades more on big
+  boards); ε=0.2 optimal; higher γ and more barriers favour the Cop; vision_radius
+  raises observability (less reliance on language).
+
+**Decisions:** notebooks excluded from ruff (compact analysis cells, not app code);
+experiment logic lives in the tested package so the notebook stays thin + reliable.
+
+**Gate:** ruff 0 errors; 145 passed; **coverage 95.8%**. All files ≤ 150 LOC.
+
+---
+
+## 2026-06-25 — Phase 10: README (scientific) + docs polish ✅
+
+**Done**
+- `README.md` (scientific): formal **Dec-POMDP model** `⟨n,S,{Aᵢ},P,R,{Ωᵢ},O,γ⟩` with
+  every element defined; **orchestration-challenge analysis** (free-NL over MCP, ambiguity
+  & deception with a real transcript excerpt, mutual position verification, negotiation,
+  no-hang fallbacks); **results** (all 6 figures + a board screenshot + a JSONL proof of
+  real MCP communication); install / usage / config / examples / structure / contributing /
+  license + credits.
+- Finalized `docs/TODO.md` (phases 0–10 ☑; Phase 11 hand-off list), confirmed `docs/PLAN.md`
+  (C4 + ADR index), per-mechanism PRDs, and `docs/PROMPTS_LOG.md`.
+- Wrote `_build/MORNING_BRIEF.md` (status + the exact 3 Phase-11 actions for Ilya).
+
+**Gate:** ruff 0 errors; 145 passed; **coverage 95.8%**. All files ≤ 150 LOC.
+No secrets tracked (verified). **Phases 0–10 complete.**
