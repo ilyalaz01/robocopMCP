@@ -79,6 +79,8 @@ class Orchestrator:
         for _ in range(rules.max_moves + 2):
             digest = (await _call(clients[Role.COP], "match_digest",
                                   session_id=session_id, token=self.token))["digest"]
+            # Log the full authoritative state each ply — feeds the board renders.
+            log_event(self.jsonl, "state", session_id=session_id, **digest)
             if digest["outcome"] != Outcome.ONGOING.value:
                 break
             turn = Role(digest["turn"])

@@ -164,3 +164,23 @@ deterministic (Q-table) so cost/latency are bounded and runs never hang.
 Haiku — keeps the protocol deterministic while the dialogue is free-text.
 
 **Gate:** ruff 0 errors; 128 passed; **coverage 95.9%**. All files ≤ 150 LOC.
+
+---
+
+## 2026-06-25 — Phase 7: Reporting (code-ready) ✅
+
+**Done**
+- `reporting/report_builder.py`: `build_internal_report` + `build_bonus_report`
+  with the assignment's EXACT field names; `count_valid`, `mcp_url`.
+- `reporting/gmail_client.py`: `GmailClient` — **JSON-only** email body; `--dry-run`
+  writes `results/report_internal.json` + `email_body.txt`; live send routes through
+  the gatekeeper (tested with a mocked Gmail service). Live OAuth = Phase 11.
+- `sdk/reporting_mixin.py`: `build_internal_report`/`build_bonus_report`/`send_report`;
+  the Cop emails **only when all sub-games are valid** (else blocks with a clear error).
+- 13 tests (exact schema both shapes, dry-run JSON-only, mocked live send, incomplete
+  block). Generated canonical `results/report_internal.json` (totals cop 120/thief 30).
+
+**Decisions:** body is JSON only (parseable by grader). Reporting is a mixin (one
+concern). Server URLs come from config; Ilya swaps in public URLs for submission.
+
+**Gate:** ruff 0 errors; 137 passed; **coverage 96.0%**. All files ≤ 150 LOC.
