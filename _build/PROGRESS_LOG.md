@@ -184,3 +184,26 @@ Haiku — keeps the protocol deterministic while the dialogue is free-text.
 concern). Server URLs come from config; Ilya swaps in public URLs for submission.
 
 **Gate:** ruff 0 errors; 137 passed; **coverage 96.0%**. All files ≤ 150 LOC.
+
+---
+
+## 2026-06-25 — Phase 8: Full series run + artifacts ✅
+
+**Done**
+- `reporting/render.py`: matplotlib board PNGs (cop/thief/barriers) from per-ply
+  `state` events (headless Agg; coverage-omitted). `reporting/summary.py`: run
+  summary + token-cost at Haiku rates ($1/$5 per M). Orchestrator now logs a
+  `state` event each ply.
+- `scripts/run_demo.py`: one reproducible SDK-only run — negotiate → 6 sub-games
+  (real Haiku) → transcript → 12 board PNGs → summary → dry-run report.
+- **Artifacts in `results/series_demo/`**: transcript.md (8 KB), negotiation.md,
+  12 PNGs (start/end ×6), summary.md/json, report_internal.json, email_body.txt,
+  events.jsonl (360 structured events: 244 tool_call, 54 state, 48 turn, …).
+- Real run: **6/6 valid**, totals cop 120 / thief 30, **124 API calls, $0.031**.
+
+**Decisions:** logs/ stays git-ignored (regenerable); the gradeable human-readable
+logs + a trimmed `events.jsonl` are committed under `results/`. Cop dominance
+reflects the trained policy on an open board — Phase 9 sensitivity explores Thief-
+favourable regimes.
+
+**Gate:** ruff 0 errors; 139 passed; **coverage 96.0%**. All files ≤ 150 LOC.
