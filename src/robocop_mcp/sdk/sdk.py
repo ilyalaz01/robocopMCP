@@ -9,13 +9,15 @@ phase (play now; training, negotiation, reporting later).
 from __future__ import annotations
 
 import asyncio
+from pathlib import Path
 
 from ..constants import Role
 from ..domain.models import MatchRules
+from ..learning.q_learning import QTable
 from ..mcp.server_app import make_server, resolve_token
 from ..mcp.session import SessionRegistry
 from ..orchestrator.orchestrator import Orchestrator, SeriesResult
-from ..orchestrator.turn_loop import Decider, default_decider
+from ..orchestrator.turn_loop import Decider, default_decider, make_llm_decider
 from ..shared.config import ConfigManager
 from ..shared.logging_setup import get_logger, setup_logging
 
@@ -35,12 +37,34 @@ class MarlSDK:
         self.token = token or resolve_token(self.cfg)
         self.rules = MatchRules.from_config(self.cfg.game())
         self.registry = SessionRegistry()
+        self.qtables = self._load_qtables()
         # In-memory servers share one registry (ADR-0002); HTTP runs use the launcher.
-        self.cop_server = make_server(Role.COP, self.token, self.registry, self.cfg)
-        self.thief_server = make_server(Role.THIEF, self.token, self.registry, self.cfg)
+        self.cop_server = make_server(
+            Role.COP, self.token, self.registry, self.cfg, self.qtables.get(Role.COP)
+        )
+        self.thief_server = make_server(
+            Role.THIEF, self.token, self.registry, self.cfg, self.qtables.get(Role.THIEF)
+        )
         self.orchestrator = Orchestrator(
             self.cop_server, self.thief_server, self.token, self.registry, self.jsonl
         )
+
+    def _load_qtables(self) -> dict:
+        """Load trained Q-tables from ``results/qtables`` if present (else heuristic)."""
+        out: dict = {}
+        base = self.cfg.root / "results" / "qtables"
+        for role, name in ((Role.COP, "qtable_cop.json"), (Role.THIEF, "qtable_thief.json")):
+            path = Path(base) / name
+            if path.is_file():
+                out[role] = QTable.load(path)
+        return out
+
+    def build_llm_decider(self, create_fn=None) -> Decider:  # pragma: no cover - live LLM
+        """Build the Haiku-backed decider (message = LLM, move = Q-suggestion)."""
+        from ..agents.anthropic_client import build_language_engine
+
+        engine = build_language_engine(self.cfg, self.jsonl, create_fn)
+        return make_llm_decider(engine, self.jsonl)
 
     def run_series(
         self, rules: MatchRules | None = None, decider: Decider = default_decider,

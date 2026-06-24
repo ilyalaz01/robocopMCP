@@ -43,16 +43,18 @@ def make_server(
     token: str | None = None,
     registry: SessionRegistry | None = None,
     config: ConfigManager | None = None,
+    qtable=None,
 ) -> FastMCP:
     """Construct (but do not run) a FastMCP server for ``role``.
 
     Returns a configured :class:`FastMCP` with every tool the role exposes,
-    each backed by a token-guarded :class:`AgentToolService`.
+    each backed by a token-guarded :class:`AgentToolService`. An optional trained
+    ``qtable`` makes ``suggest_move`` use the learned policy.
     """
     cfg = config or ConfigManager()
     jsonl = setup_logging(cfg)
     tok = token or resolve_token(cfg)
-    service = AgentToolService(registry or REGISTRY, role, tok, jsonl)
+    service = AgentToolService(registry or REGISTRY, role, tok, jsonl, qtable=qtable)
 
     mcp: FastMCP = FastMCP(f"robocop-{role.value}")
     for name in _SHARED_TOOLS:

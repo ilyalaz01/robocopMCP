@@ -55,6 +55,7 @@ omit = [
     "src/robocop_mcp/cli.py",
     "src/robocop_mcp/mcp/cop_server.py",
     "src/robocop_mcp/mcp/thief_server.py",
+    "src/robocop_mcp/agents/anthropic_client.py",
     "src/robocop_mcp/reporting/render.py",
     "*/tests/*",
 ]

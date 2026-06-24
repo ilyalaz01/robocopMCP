@@ -46,6 +46,32 @@ def default_decider(
     return f"[{role.value}] turn {step}: {intent}, moving {suggestion}.", ("move", suggestion)
 
 
+def _action_from_suggestion(role: Role, suggestion: str | None) -> tuple[str, str | None]:
+    """Map a suggestion to a concrete action (shared by heuristic + LLM deciders)."""
+    if suggestion == "PLACE_BARRIER" or (suggestion is None and role is Role.COP):
+        return ("barrier", None)
+    if suggestion is None:
+        return ("move", None)
+    return ("move", suggestion)
+
+
+def make_llm_decider(language, jsonl=None) -> Decider:
+    """Build a decider whose *message* is real Haiku and *move* is the Q-suggestion.
+
+    SPEC §5: language is the LLM's job, movement is the Q-table's — they do not
+    fight. The opponent's last message is interpreted into a logged belief.
+    """
+    def decide(role: Role, observation: dict, messages: list, suggestion: str | None):
+        text = language.message(role, observation, messages, suggestion)
+        if messages:
+            belief = language.interpret(role, messages[-1]["text"])
+            if jsonl is not None:
+                log_event(jsonl, "belief", role=role.value, belief=belief)
+        return text, _action_from_suggestion(role, suggestion)
+
+    return decide
+
+
 async def play_turn(
     client: Any, role: Role, token: str, session_id: str, jsonl, decider: Decider
 ) -> dict:

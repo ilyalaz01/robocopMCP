@@ -96,3 +96,26 @@ testable, works across two systems) rather than transport middleware.
 (per ADR-0002); targets accept in-memory servers (tests) or HTTP URLs (Phase 8).
 
 **Gate:** ruff 0 errors; 86 passed; **coverage 95.6%**. All files ≤ 150 LOC.
+
+---
+
+## 2026-06-25 — Phase 4: Q-learning + heuristic baseline ✅
+
+**Done**
+- `learning/q_learning.py`: `QTable` (Bellman update, epsilon-greedy with legal-
+  action masking, decay, JSON save/load), `encode_state` (clamped relative
+  displacement), `action_space` (8 moves; +PLACE_BARRIER for Cop).
+- `learning/trainer.py`: offline self-play (`run_episode`/`train`) on the pure
+  engine with randomized starts + shaped rewards (Cop pressured to capture fast;
+  Thief rewarded for surviving to timeout). Saves both tables + `learning_curve.csv`.
+- `suggest_move` MCP tool now uses a trained Q-table when provided (else heuristic);
+  `default_decider` handles `PLACE_BARRIER`.
+- Trained canonical tables → `results/qtables/` (5000 eps, seed 0; Cop reward
+  46.1→47.6, deterministic). Heuristic baseline retained in `agents/strategy.py`.
+
+**Decisions:** state = clamped `(dx,dy)` to opponent (board-size-agnostic, small
+table). Training is fully deterministic under a fixed seed → reliable convergence
+test. Reward saturates on open boards (Cop captures easily); notebook (Phase 9)
+will present capture-time + Q-vs-heuristic to make learning visually clear.
+
+**Gate:** ruff 0 errors; 99 passed; **coverage 95.9%**. All files ≤ 150 LOC.
