@@ -119,3 +119,27 @@ test. Reward saturates on open boards (Cop captures easily); notebook (Phase 9)
 will present capture-time + Q-vs-heuristic to make learning visually clear.
 
 **Gate:** ruff 0 errors; 99 passed; **coverage 95.9%**. All files ≤ 150 LOC.
+
+---
+
+## 2026-06-25 — Phase 5: NL layer + API gatekeeper (real Haiku) ✅
+
+**Done**
+- `shared/gatekeeper.py`: `ApiGatekeeper` — sliding-window rate limit, FIFO queue
+  with drain, backpressure (`QueueFullError`), transient retry, per-call logging
+  incl. input/output token counts. Injectable clock/sleep → deterministic tests.
+- `agents/persona.py`: cop/thief/negotiator/interpreter prompts (Thief is told to
+  bluff). `agents/language.py`: `LanguageEngine` (generate + interpret through the
+  gatekeeper, timeout + templated fallback). `agents/anthropic_client.py`: the lone
+  live-SDK wiring (coverage-omitted; loads key from `.env`).
+- `orchestrator.make_llm_decider`: message = real Haiku, move = Q-suggestion
+  (SPEC §5 — language and movement don't fight); opponent message → logged belief.
+- `reporting/transcript.py`: Markdown transcript from the JSONL stream.
+- **Real Haiku sub-game** → `results/haiku_demo/transcript.md`: the Thief actively
+  bluffs ("heading to the docks", "already three blocks north"); 15 API calls,
+  tokens logged (e.g. 122/165/114 input tokens).
+
+**Decisions:** every Anthropic call routes through the gatekeeper. Movement stays
+deterministic (Q-table) so cost/latency are bounded and runs never hang.
+
+**Gate:** ruff 0 errors; 119 passed; **coverage 96.0%**. All files ≤ 150 LOC.

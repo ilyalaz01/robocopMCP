@@ -8,7 +8,7 @@ fallback, so an unattended run never hangs and every fallback is logged.
 
 from __future__ import annotations
 
-from ..agents.persona import INTERPRETER_PROMPT, persona_for
+from ..agents.persona import INTERPRETER_PROMPT, NEGOTIATOR_PERSONA, persona_for
 from ..constants import Role
 from ..shared.logging_setup import log_event
 
@@ -70,6 +70,12 @@ class LanguageEngine:
         intent = suggestion or "hold"
         verb = "closing in" if role is Role.COP else "slipping away"
         return f"[{role.value}] {verb} ({intent})."
+
+    def negotiation_line(self, role: Role, intent: str, detail: str) -> str:
+        """One short negotiation utterance (propose/argue/accept/concede/confirm)."""
+        user = (f"You are the {role.value}. You want to {intent}. Context: {detail}. "
+                "Say it in one short, polite sentence.")
+        return self._complete(NEGOTIATOR_PERSONA, user) or f"[{role.value}] {intent}: {detail}"
 
     def interpret(self, role: Role, message: str) -> str:
         """Infer a coarse directional belief about the opponent from a message."""

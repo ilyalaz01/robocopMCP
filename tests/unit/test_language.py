@@ -79,6 +79,27 @@ def test_extract_text_plain_string() -> None:
     assert _extract_text("hello") == "hello"
 
 
+def test_negotiation_line_uses_negotiator_persona(tmp_path) -> None:
+    captured = {}
+
+    def create(**kw):
+        captured["system"] = kw["system"]
+        return _Resp("How about we allow seven barriers?")
+
+    eng = _engine(tmp_path, create)
+    line = eng.negotiation_line(Role.COP, "propose", "max_barriers=7")
+    assert line == "How about we allow seven barriers?"
+    assert "negotiat" in captured["system"].lower()
+
+
+def test_negotiation_line_fallback(tmp_path) -> None:
+    def boom(**kw):
+        raise RuntimeError("down")
+
+    line = _engine(tmp_path, boom).negotiation_line(Role.THIEF, "accept", "ok")
+    assert line == "[thief] accept: ok"
+
+
 @pytest.mark.parametrize("role", [Role.COP, Role.THIEF])
 def test_persona_distinct(tmp_path, role) -> None:
     captured = {}

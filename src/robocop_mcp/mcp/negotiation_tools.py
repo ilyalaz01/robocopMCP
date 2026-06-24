@@ -46,11 +46,13 @@ class NegotiationMixin:
         }
         session.proposals.append(response)
         session.post_message(self.role, message)  # type: ignore[attr-defined]
-        if accept and session.proposals:
-            # Adopt the most recent concrete ruleset as the working agreement.
+        if accept:
+            # Adopt the most recent concrete ruleset on the table — either a prior
+            # proposal's ``rules`` or a counter-offer's ``counter_rules``.
             for prior in reversed(session.proposals):
-                if prior.get("rules"):
-                    session.agreed_rules = prior["rules"]
+                candidate = prior.get("rules") or prior.get("counter_rules")
+                if candidate:
+                    session.agreed_rules = candidate
                     break
         self._log("negotiate_respond", session_id, ok=True, accept=accept)  # type: ignore[attr-defined]
         return {"ok": True, "response": response, "agreed_rules": session.agreed_rules}
