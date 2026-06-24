@@ -30,3 +30,23 @@ coverage + lint status.
 (≥ 85%). All files ≤ 150 LOC.
 
 **Issues:** none. Vercel session hooks are irrelevant to this Python project — ignored.
+
+---
+
+## 2026-06-25 — Phase 1: Game engine (pure) ✅
+
+**Done**
+- `domain/models.py` (Position, MatchRules, GameState, Observation, MoveResult,
+  SubGameResult), `domain/board.py` (geometry + barrier passability),
+  `domain/observation.py` (Chebyshev vision window), `domain/rules.py` (capture,
+  move legality, scoring, series accumulate), `domain/engine.py` (state machine:
+  thief-first turn order, capture/timeout, barrier placement forfeits move).
+- 50 unit tests across models/board/observation/rules/engine incl. edge cases:
+  capture on move 1, max-moves timeout = thief win, illegal/out-of-turn rejection,
+  thief-may-not-STAY, barrier limit/exists/forbidden, corner off-board moves.
+
+**Decisions:** ply = one agent action; timeout (move_count ≥ max_moves) ⇒ thief
+evasion win. Barriers block only the Thief. No new ADR needed (all per SPEC §3).
+
+**Gate:** ruff 0 errors; 50 passed; **coverage 96%** overall, domain 98-100%.
+All files ≤ 150 LOC (largest: models.py 95, engine.py 94).
