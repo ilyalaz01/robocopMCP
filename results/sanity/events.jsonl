@@ -1,0 +1,81 @@
+{"ts": "2026-06-24T23:06:46.931728+00:00", "mono": 1783.863456, "event": "subgame_start", "match_id": "sanity2x2", "index": 0, "cop": [0, 0], "thief": [1, 1]}
+{"ts": "2026-06-24T23:06:46.967491+00:00", "mono": 1783.899219, "event": "tool_call", "role": "thief", "tool": "observe", "session_id": "sanity2x2-sg0", "ok": true}
+{"ts": "2026-06-24T23:06:46.971206+00:00", "mono": 1783.902934, "event": "tool_call", "role": "thief", "tool": "read_messages", "session_id": "sanity2x2-sg0", "ok": true, "count": 0}
+{"ts": "2026-06-24T23:06:46.975448+00:00", "mono": 1783.907176, "event": "tool_call", "role": "thief", "tool": "suggest_move", "session_id": "sanity2x2-sg0", "ok": true, "suggestion": "S"}
+{"ts": "2026-06-24T23:06:46.981691+00:00", "mono": 1783.913419, "event": "tool_call", "role": "thief", "tool": "send_message", "session_id": "sanity2x2-sg0", "ok": true, "text": "[thief] turn 0: slipping away, moving S."}
+{"ts": "2026-06-24T23:06:46.987782+00:00", "mono": 1783.91951, "event": "tool_call", "role": "thief", "tool": "move", "session_id": "sanity2x2-sg0", "ok": true, "direction": "S", "reason": "ok"}
+{"ts": "2026-06-24T23:06:46.991523+00:00", "mono": 1783.923251, "event": "turn", "role": "thief", "session_id": "sanity2x2-sg0", "message": "[thief] turn 0: slipping away, moving S.", "action": "move", "direction": "S", "ok": true, "reason": "ok"}
+{"ts": "2026-06-24T23:06:46.998756+00:00", "mono": 1783.930486, "event": "tool_call", "role": "cop", "tool": "observe", "session_id": "sanity2x2-sg0", "ok": true}
+{"ts": "2026-06-24T23:06:47.004773+00:00", "mono": 1783.936502, "event": "tool_call", "role": "cop", "tool": "read_messages", "session_id": "sanity2x2-sg0", "ok": true, "count": 1}
+{"ts": "2026-06-24T23:06:47.009524+00:00", "mono": 1783.941252, "event": "tool_call", "role": "cop", "tool": "suggest_move", "session_id": "sanity2x2-sg0", "ok": true, "suggestion": "E"}
+{"ts": "2026-06-24T23:06:47.019197+00:00", "mono": 1783.950925, "event": "tool_call", "role": "cop", "tool": "send_message", "session_id": "sanity2x2-sg0", "ok": true, "text": "[cop] turn 1: closing in, moving E."}
+{"ts": "2026-06-24T23:06:47.023494+00:00", "mono": 1783.955222, "event": "tool_call", "role": "cop", "tool": "move", "session_id": "sanity2x2-sg0", "ok": true, "direction": "E", "reason": "ok"}
+{"ts": "2026-06-24T23:06:47.026893+00:00", "mono": 1783.95862, "event": "turn", "role": "cop", "session_id": "sanity2x2-sg0", "message": "[cop] turn 1: closing in, moving E.", "action": "move", "direction": "E", "ok": true, "reason": "ok"}
+{"ts": "2026-06-24T23:06:47.031656+00:00", "mono": 1783.963383, "event": "subgame_end", "match_id": "sanity2x2", "index": 0, "outcome": "cop_win", "moves": 2, "cop_score": 20, "thief_score": 5}
+{"ts": "2026-06-24T23:06:47.034271+00:00", "mono": 1783.965999, "event": "series_end", "match_id": "sanity2x2", "totals": {"cop": 20, "thief": 5}}
+{"ts": "2026-06-24T23:06:47.040911+00:00", "mono": 1783.972639, "event": "subgame_start", "match_id": "sanity3x3", "index": 0, "cop": [0, 0], "thief": [2, 2]}
+{"ts": "2026-06-24T23:06:47.046026+00:00", "mono": 1783.977754, "event": "tool_call", "role": "thief", "tool": "observe", "session_id": "sanity3x3-sg0", "ok": true}
+{"ts": "2026-06-24T23:06:47.049205+00:00", "mono": 1783.980934, "event": "tool_call", "role": "thief", "tool": "read_messages", "session_id": "sanity3x3-sg0", "ok": true, "count": 0}
+{"ts": "2026-06-24T23:06:47.053397+00:00", "mono": 1783.985125, "event": "tool_call", "role": "thief", "tool": "suggest_move", "session_id": "sanity3x3-sg0", "ok": true, "suggestion": "S"}
+{"ts": "2026-06-24T23:06:47.059648+00:00", "mono": 1783.991375, "event": "tool_call", "role": "thief", "tool": "send_message", "session_id": "sanity3x3-sg0", "ok": true, "text": "[thief] turn 0: slipping away, moving S."}
+{"ts": "2026-06-24T23:06:47.063859+00:00", "mono": 1783.995586, "event": "tool_call", "role": "thief", "tool": "move", "session_id": "sanity3x3-sg0", "ok": true, "direction": "S", "reason": "ok"}
+{"ts": "2026-06-24T23:06:47.067554+00:00", "mono": 1783.999282, "event": "turn", "role": "thief", "session_id": "sanity3x3-sg0", "message": "[thief] turn 0: slipping away, moving S.", "action": "move", "direction": "S", "ok": true, "reason": "ok"}
+{"ts": "2026-06-24T23:06:47.073224+00:00", "mono": 1784.004952, "event": "tool_call", "role": "cop", "tool": "observe", "session_id": "sanity3x3-sg0", "ok": true}
+{"ts": "2026-06-24T23:06:47.076579+00:00", "mono": 1784.008307, "event": "tool_call", "role": "cop", "tool": "read_messages", "session_id": "sanity3x3-sg0", "ok": true, "count": 1}
+{"ts": "2026-06-24T23:06:47.080813+00:00", "mono": 1784.01254, "event": "tool_call", "role": "cop", "tool": "suggest_move", "session_id": "sanity3x3-sg0", "ok": true, "suggestion": "NE"}
+{"ts": "2026-06-24T23:06:47.086199+00:00", "mono": 1784.017928, "event": "tool_call", "role": "cop", "tool": "send_message", "session_id": "sanity3x3-sg0", "ok": true, "text": "[cop] turn 1: closing in, moving NE."}
+{"ts": "2026-06-24T23:06:47.090537+00:00", "mono": 1784.022265, "event": "tool_call", "role": "cop", "tool": "move", "session_id": "sanity3x3-sg0", "ok": true, "direction": "NE", "reason": "ok"}
+{"ts": "2026-06-24T23:06:47.094082+00:00", "mono": 1784.02581, "event": "turn", "role": "cop", "session_id": "sanity3x3-sg0", "message": "[cop] turn 1: closing in, moving NE.", "action": "move", "direction": "NE", "ok": true, "reason": "ok"}
+{"ts": "2026-06-24T23:06:47.099894+00:00", "mono": 1784.031622, "event": "tool_call", "role": "thief", "tool": "observe", "session_id": "sanity3x3-sg0", "ok": true}
+{"ts": "2026-06-24T23:06:47.103105+00:00", "mono": 1784.034832, "event": "tool_call", "role": "thief", "tool": "read_messages", "session_id": "sanity3x3-sg0", "ok": true, "count": 1}
+{"ts": "2026-06-24T23:06:47.107586+00:00", "mono": 1784.039314, "event": "tool_call", "role": "thief", "tool": "suggest_move", "session_id": "sanity3x3-sg0", "ok": true, "suggestion": "N"}
+{"ts": "2026-06-24T23:06:47.111765+00:00", "mono": 1784.043493, "event": "tool_call", "role": "thief", "tool": "send_message", "session_id": "sanity3x3-sg0", "ok": true, "text": "[thief] turn 2: slipping away, moving N."}
+{"ts": "2026-06-24T23:06:47.116316+00:00", "mono": 1784.048044, "event": "tool_call", "role": "thief", "tool": "move", "session_id": "sanity3x3-sg0", "ok": true, "direction": "N", "reason": "ok"}
+{"ts": "2026-06-24T23:06:47.122604+00:00", "mono": 1784.054335, "event": "turn", "role": "thief", "session_id": "sanity3x3-sg0", "message": "[thief] turn 2: slipping away, moving N.", "action": "move", "direction": "N", "ok": true, "reason": "ok"}
+{"ts": "2026-06-24T23:06:47.128711+00:00", "mono": 1784.060439, "event": "tool_call", "role": "cop", "tool": "observe", "session_id": "sanity3x3-sg0", "ok": true}
+{"ts": "2026-06-24T23:06:47.132496+00:00", "mono": 1784.064225, "event": "tool_call", "role": "cop", "tool": "read_messages", "session_id": "sanity3x3-sg0", "ok": true, "count": 2}
+{"ts": "2026-06-24T23:06:47.139368+00:00", "mono": 1784.071097, "event": "tool_call", "role": "cop", "tool": "suggest_move", "session_id": "sanity3x3-sg0", "ok": true, "suggestion": "NE"}
+{"ts": "2026-06-24T23:06:47.143537+00:00", "mono": 1784.075265, "event": "tool_call", "role": "cop", "tool": "send_message", "session_id": "sanity3x3-sg0", "ok": true, "text": "[cop] turn 3: closing in, moving NE."}
+{"ts": "2026-06-24T23:06:47.148077+00:00", "mono": 1784.079807, "event": "tool_call", "role": "cop", "tool": "move", "session_id": "sanity3x3-sg0", "ok": true, "direction": "NE", "reason": "ok"}
+{"ts": "2026-06-24T23:06:47.154181+00:00", "mono": 1784.085912, "event": "turn", "role": "cop", "session_id": "sanity3x3-sg0", "message": "[cop] turn 3: closing in, moving NE.", "action": "move", "direction": "NE", "ok": true, "reason": "ok"}
+{"ts": "2026-06-24T23:06:47.160563+00:00", "mono": 1784.092292, "event": "subgame_end", "match_id": "sanity3x3", "index": 0, "outcome": "cop_win", "moves": 4, "cop_score": 20, "thief_score": 5}
+{"ts": "2026-06-24T23:06:47.163237+00:00", "mono": 1784.094967, "event": "series_end", "match_id": "sanity3x3", "totals": {"cop": 20, "thief": 5}}
+{"ts": "2026-06-24T23:06:47.172952+00:00", "mono": 1784.10468, "event": "subgame_start", "match_id": "sanity4x4", "index": 0, "cop": [0, 0], "thief": [3, 3]}
+{"ts": "2026-06-24T23:06:47.180117+00:00", "mono": 1784.111845, "event": "tool_call", "role": "thief", "tool": "observe", "session_id": "sanity4x4-sg0", "ok": true}
+{"ts": "2026-06-24T23:06:47.183880+00:00", "mono": 1784.115608, "event": "tool_call", "role": "thief", "tool": "read_messages", "session_id": "sanity4x4-sg0", "ok": true, "count": 0}
+{"ts": "2026-06-24T23:06:47.190363+00:00", "mono": 1784.12209, "event": "tool_call", "role": "thief", "tool": "suggest_move", "session_id": "sanity4x4-sg0", "ok": true, "suggestion": "S"}
+{"ts": "2026-06-24T23:06:47.196855+00:00", "mono": 1784.128582, "event": "tool_call", "role": "thief", "tool": "send_message", "session_id": "sanity4x4-sg0", "ok": true, "text": "[thief] turn 0: slipping away, moving S."}
+{"ts": "2026-06-24T23:06:47.204064+00:00", "mono": 1784.135793, "event": "tool_call", "role": "thief", "tool": "move", "session_id": "sanity4x4-sg0", "ok": true, "direction": "S", "reason": "ok"}
+{"ts": "2026-06-24T23:06:47.209589+00:00", "mono": 1784.141317, "event": "turn", "role": "thief", "session_id": "sanity4x4-sg0", "message": "[thief] turn 0: slipping away, moving S.", "action": "move", "direction": "S", "ok": true, "reason": "ok"}
+{"ts": "2026-06-24T23:06:47.218037+00:00", "mono": 1784.149765, "event": "tool_call", "role": "cop", "tool": "observe", "session_id": "sanity4x4-sg0", "ok": true}
+{"ts": "2026-06-24T23:06:47.222337+00:00", "mono": 1784.154064, "event": "tool_call", "role": "cop", "tool": "read_messages", "session_id": "sanity4x4-sg0", "ok": true, "count": 1}
+{"ts": "2026-06-24T23:06:47.228431+00:00", "mono": 1784.160158, "event": "tool_call", "role": "cop", "tool": "suggest_move", "session_id": "sanity4x4-sg0", "ok": true, "suggestion": "NE"}
+{"ts": "2026-06-24T23:06:47.233908+00:00", "mono": 1784.165635, "event": "tool_call", "role": "cop", "tool": "send_message", "session_id": "sanity4x4-sg0", "ok": true, "text": "[cop] turn 1: closing in, moving NE."}
+{"ts": "2026-06-24T23:06:47.239707+00:00", "mono": 1784.171434, "event": "tool_call", "role": "cop", "tool": "move", "session_id": "sanity4x4-sg0", "ok": true, "direction": "NE", "reason": "ok"}
+{"ts": "2026-06-24T23:06:47.245110+00:00", "mono": 1784.176839, "event": "turn", "role": "cop", "session_id": "sanity4x4-sg0", "message": "[cop] turn 1: closing in, moving NE.", "action": "move", "direction": "NE", "ok": true, "reason": "ok"}
+{"ts": "2026-06-24T23:06:47.253529+00:00", "mono": 1784.185258, "event": "tool_call", "role": "thief", "tool": "observe", "session_id": "sanity4x4-sg0", "ok": true}
+{"ts": "2026-06-24T23:06:47.256276+00:00", "mono": 1784.188022, "event": "tool_call", "role": "thief", "tool": "read_messages", "session_id": "sanity4x4-sg0", "ok": true, "count": 1}
+{"ts": "2026-06-24T23:06:47.261578+00:00", "mono": 1784.193306, "event": "tool_call", "role": "thief", "tool": "suggest_move", "session_id": "sanity4x4-sg0", "ok": true, "suggestion": "N"}
+{"ts": "2026-06-24T23:06:47.267089+00:00", "mono": 1784.198818, "event": "tool_call", "role": "thief", "tool": "send_message", "session_id": "sanity4x4-sg0", "ok": true, "text": "[thief] turn 2: slipping away, moving N."}
+{"ts": "2026-06-24T23:06:47.271937+00:00", "mono": 1784.203665, "event": "tool_call", "role": "thief", "tool": "move", "session_id": "sanity4x4-sg0", "ok": true, "direction": "N", "reason": "ok"}
+{"ts": "2026-06-24T23:06:47.276359+00:00", "mono": 1784.208088, "event": "turn", "role": "thief", "session_id": "sanity4x4-sg0", "message": "[thief] turn 2: slipping away, moving N.", "action": "move", "direction": "N", "ok": true, "reason": "ok"}
+{"ts": "2026-06-24T23:06:47.282656+00:00", "mono": 1784.214385, "event": "tool_call", "role": "cop", "tool": "observe", "session_id": "sanity4x4-sg0", "ok": true}
+{"ts": "2026-06-24T23:06:47.289424+00:00", "mono": 1784.221153, "event": "tool_call", "role": "cop", "tool": "read_messages", "session_id": "sanity4x4-sg0", "ok": true, "count": 2}
+{"ts": "2026-06-24T23:06:47.295314+00:00", "mono": 1784.227043, "event": "tool_call", "role": "cop", "tool": "suggest_move", "session_id": "sanity4x4-sg0", "ok": true, "suggestion": "NE"}
+{"ts": "2026-06-24T23:06:47.299891+00:00", "mono": 1784.231618, "event": "tool_call", "role": "cop", "tool": "send_message", "session_id": "sanity4x4-sg0", "ok": true, "text": "[cop] turn 3: closing in, moving NE."}
+{"ts": "2026-06-24T23:06:47.304505+00:00", "mono": 1784.236233, "event": "tool_call", "role": "cop", "tool": "move", "session_id": "sanity4x4-sg0", "ok": true, "direction": "NE", "reason": "ok"}
+{"ts": "2026-06-24T23:06:47.309843+00:00", "mono": 1784.241571, "event": "turn", "role": "cop", "session_id": "sanity4x4-sg0", "message": "[cop] turn 3: closing in, moving NE.", "action": "move", "direction": "NE", "ok": true, "reason": "ok"}
+{"ts": "2026-06-24T23:06:47.315872+00:00", "mono": 1784.2476, "event": "tool_call", "role": "thief", "tool": "observe", "session_id": "sanity4x4-sg0", "ok": true}
+{"ts": "2026-06-24T23:06:47.319518+00:00", "mono": 1784.251246, "event": "tool_call", "role": "thief", "tool": "read_messages", "session_id": "sanity4x4-sg0", "ok": true, "count": 2}
+{"ts": "2026-06-24T23:06:47.323854+00:00", "mono": 1784.255582, "event": "tool_call", "role": "thief", "tool": "suggest_move", "session_id": "sanity4x4-sg0", "ok": true, "suggestion": "S"}
+{"ts": "2026-06-24T23:06:47.328234+00:00", "mono": 1784.259962, "event": "tool_call", "role": "thief", "tool": "send_message", "session_id": "sanity4x4-sg0", "ok": true, "text": "[thief] turn 4: slipping away, moving S."}
+{"ts": "2026-06-24T23:06:47.332569+00:00", "mono": 1784.264298, "event": "tool_call", "role": "thief", "tool": "move", "session_id": "sanity4x4-sg0", "ok": true, "direction": "S", "reason": "ok"}
+{"ts": "2026-06-24T23:06:47.336172+00:00", "mono": 1784.2679, "event": "turn", "role": "thief", "session_id": "sanity4x4-sg0", "message": "[thief] turn 4: slipping away, moving S.", "action": "move", "direction": "S", "ok": true, "reason": "ok"}
+{"ts": "2026-06-24T23:06:47.341973+00:00", "mono": 1784.2737, "event": "tool_call", "role": "cop", "tool": "observe", "session_id": "sanity4x4-sg0", "ok": true}
+{"ts": "2026-06-24T23:06:47.345602+00:00", "mono": 1784.27733, "event": "tool_call", "role": "cop", "tool": "read_messages", "session_id": "sanity4x4-sg0", "ok": true, "count": 3}
+{"ts": "2026-06-24T23:06:47.350040+00:00", "mono": 1784.281768, "event": "tool_call", "role": "cop", "tool": "suggest_move", "session_id": "sanity4x4-sg0", "ok": true, "suggestion": "E"}
+{"ts": "2026-06-24T23:06:47.356773+00:00", "mono": 1784.288502, "event": "tool_call", "role": "cop", "tool": "send_message", "session_id": "sanity4x4-sg0", "ok": true, "text": "[cop] turn 5: closing in, moving E."}
+{"ts": "2026-06-24T23:06:47.363142+00:00", "mono": 1784.294872, "event": "tool_call", "role": "cop", "tool": "move", "session_id": "sanity4x4-sg0", "ok": true, "direction": "E", "reason": "ok"}
+{"ts": "2026-06-24T23:06:47.367351+00:00", "mono": 1784.29908, "event": "turn", "role": "cop", "session_id": "sanity4x4-sg0", "message": "[cop] turn 5: closing in, moving E.", "action": "move", "direction": "E", "ok": true, "reason": "ok"}
+{"ts": "2026-06-24T23:06:47.377589+00:00", "mono": 1784.30932, "event": "subgame_end", "match_id": "sanity4x4", "index": 0, "outcome": "cop_win", "moves": 6, "cop_score": 20, "thief_score": 5}
+{"ts": "2026-06-24T23:06:47.381717+00:00", "mono": 1784.313448, "event": "series_end", "match_id": "sanity4x4", "totals": {"cop": 20, "thief": 5}}
