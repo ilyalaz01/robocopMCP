@@ -27,11 +27,12 @@ from ..orchestrator.orchestrator import Orchestrator, SeriesResult
 from ..orchestrator.turn_loop import Decider, default_decider, make_llm_decider
 from ..shared.config import ConfigManager
 from ..shared.logging_setup import get_logger, setup_logging
+from .reporting_mixin import ReportingMixin
 
 _LOG = get_logger("robocop.sdk")
 
 
-class MarlSDK:
+class MarlSDK(ReportingMixin):
     """Façade over the pursuit-game pipeline.
 
     Setup:  config (ConfigManager | None), token (str | None — defaults to the

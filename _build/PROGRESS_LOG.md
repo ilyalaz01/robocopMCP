@@ -143,3 +143,24 @@ will present capture-time + Q-vs-heuristic to make learning visually clear.
 deterministic (Q-table) so cost/latency are bounded and runs never hang.
 
 **Gate:** ruff 0 errors; 119 passed; **coverage 96.0%**. All files ≤ 150 LOC.
+
+---
+
+## 2026-06-25 — Phase 6: Negotiation phase ✅
+
+**Done**
+- `orchestrator/negotiation.py`: `NegotiationDriver` runs propose → (counter)* →
+  mutual confirm over the MCP negotiation tools. Intelligent-listener persona:
+  proposes its own ruleset, argues briefly, **concedes gracefully after
+  `max_rounds`** — never deadlocks. `write_negotiation_md` saves the full dialogue.
+- `negotiate_respond` now adopts a counter-offer's `counter_rules` on concession.
+- `language.negotiation_line` (negotiator persona). `SDK.negotiate(stance=...)`
+  supports easy-agree + must-concede, applies agreed `max_barriers`/`grid_size`.
+- **Real Haiku negotiation** → `results/haiku_neg/negotiation.md`: Cop argues for
+  fewer barriers, Thief pushes for more; Cop concedes to 11 after 6 rounds; both
+  confirm. Tests cover both paths (mocked) + grid override + md writer.
+
+**Decisions:** structured accept/counter is a stance policy; the NL argument is
+Haiku — keeps the protocol deterministic while the dialogue is free-text.
+
+**Gate:** ruff 0 errors; 128 passed; **coverage 95.9%**. All files ≤ 150 LOC.
