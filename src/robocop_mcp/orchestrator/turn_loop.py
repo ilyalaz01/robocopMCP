@@ -40,6 +40,8 @@ def default_decider(
         if role is Role.COP:
             return f"[cop] turn {step}: no path — placing a barrier.", ("barrier", None)
         return f"[thief] turn {step}: cornered!", ("move", None)
+    if suggestion == "PLACE_BARRIER":
+        return f"[cop] turn {step}: walling off an escape route.", ("barrier", None)
     intent = "closing in" if role is Role.COP else "slipping away"
     return f"[{role.value}] turn {step}: {intent}, moving {suggestion}.", ("move", suggestion)
 

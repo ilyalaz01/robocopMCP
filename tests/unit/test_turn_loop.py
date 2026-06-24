@@ -17,6 +17,11 @@ def test_decider_cop_boxed_places_barrier() -> None:
     assert kind == "barrier" and direction is None
 
 
+def test_decider_barrier_suggestion() -> None:
+    _, (kind, direction) = default_decider(Role.COP, {"move_count": 3}, [], "PLACE_BARRIER")
+    assert kind == "barrier" and direction is None
+
+
 def test_decider_thief_cornered() -> None:
     msg, (kind, direction) = default_decider(Role.THIEF, {"move_count": 9}, [], None)
     assert kind == "move" and direction is None

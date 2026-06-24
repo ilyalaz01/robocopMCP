@@ -24,11 +24,15 @@ class AgentToolService(NegotiationMixin):
     Setup:  registry, role (COP/THIEF), token (revocable), jsonl_path (log sink).
     """
 
-    def __init__(self, registry: SessionRegistry, role: Role, token: str, jsonl_path: Path) -> None:
+    def __init__(
+        self, registry: SessionRegistry, role: Role, token: str, jsonl_path: Path, qtable=None
+    ) -> None:
         self.registry = registry
         self.role = role
         self.token = token
         self.jsonl_path = jsonl_path
+        # When a trained Q-table is supplied, suggest_move uses it; else heuristic.
+        self.qtable = qtable
 
     # --- internals -------------------------------------------------------
     def _auth(self, token: str) -> dict | None:
@@ -101,10 +105,24 @@ class AgentToolService(NegotiationMixin):
         else:
             target = default_target(self.role, eng.rules.cop_start, eng.rules.thief_start)
         own = eng.state.cop if self.role is Role.COP else eng.state.thief
-        action = heuristic_action(self.role, own, target, eng.board, eng.state.barriers)
-        suggestion = action.value if action else None
-        self._log("suggest_move", session_id, ok=True, suggestion=suggestion)
+        suggestion = self._suggest(eng, own, target)
+        self._log("suggest_move", session_id, ok=True, suggestion=suggestion,
+                  source="qtable" if self.qtable else "heuristic")
         return {"ok": True, "suggestion": suggestion}
+
+    def _suggest(self, eng, own: Position, target: Position) -> str | None:
+        """Pick an action from the Q-table if present, else the heuristic."""
+        if self.qtable is not None:
+            from ..learning.q_learning import encode_state
+            from ..learning.trainer import legal_indices
+
+            legal = legal_indices(eng, self.role, self.qtable.actions)
+            if legal:
+                idx = self.qtable.select(encode_state(own, target), legal, explore=False)
+                return self.qtable.actions[idx]
+            return None
+        action = heuristic_action(self.role, own, target, eng.board, eng.state.barriers)
+        return action.value if action else None
 
     def move(self, session_id: str, token: str, direction: str) -> dict:
         """Validate + apply a one-step move (mutual position verification)."""

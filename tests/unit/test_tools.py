@@ -90,6 +90,23 @@ def test_thief_barrier_forbidden(setup) -> None:
     assert not res["ok"] and "barrier_forbidden" in res["reason"]
 
 
+def test_suggest_move_uses_qtable(base_game_config, tmp_path) -> None:
+    import numpy as np
+
+    from robocop_mcp.learning.q_learning import QTable, action_space, encode_state
+
+    reg = SessionRegistry()
+    reg.create("m1", MatchRules.from_config(base_game_config))
+    acts = action_space(Role.COP)
+    qt = QTable(acts, epsilon=0.0)
+    # Cop at (0,0), unseen thief → target defaults to (4,4); state (4,4).
+    row = np.zeros(len(acts))
+    row[acts.index("NE")] = 9.0
+    qt.q[encode_state(Position(0, 0), Position(4, 4))] = row
+    cop = AgentToolService(reg, Role.COP, TOKEN, tmp_path / "e.jsonl", qtable=qt)
+    assert cop.suggest_move("m1", TOKEN)["suggestion"] == "NE"
+
+
 def test_match_digest(setup) -> None:
     _, cop, _, _ = setup
     d = cop.match_digest("m1", TOKEN)["digest"]

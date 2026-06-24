@@ -74,3 +74,25 @@ session proposed for inter-team). Token passed as explicit tool arg (portable,
 testable, works across two systems) rather than transport middleware.
 
 **Gate:** ruff 0 errors; 80 passed; **coverage 95.7%**. All files ≤ 150 LOC.
+
+---
+
+## 2026-06-25 — Phase 3: Orchestrator + full local pipeline (heuristic) ✅
+
+**Done**
+- `orchestrator/turn_loop.py`: `play_turn` (observe → read → suggest → message →
+  act over MCP tools) with an injectable `Decider` (heuristic now, LLM later) and
+  a `default_decider`. `orchestrator/orchestrator.py`: `Orchestrator` driving the
+  sub-game + 6-sub-game series loops, parameterized by cop/thief targets
+  (in-memory servers now, HTTP URLs ready), with technical-loss/void re-run.
+- `sdk/sdk.py`: `MarlSDK` single entry point (builds the two servers over a shared
+  registry, exposes `run_series`/`run_sub_game`). CLI `--play` delegates to it.
+- Integration tests: full series completes, 3×3 sub-game logs per-turn events,
+  forced-void path records a void; unit tests for the decider branches.
+- **Sanity runs** 2×2/3×3/4×4 → `results/sanity/` (summary.md + 81 MCP turn-event
+  lines). `uv run robocop --play` runs a full 6-sub-game series over MCP.
+
+**Decisions:** orchestrator + servers share one process/registry for local play
+(per ADR-0002); targets accept in-memory servers (tests) or HTTP URLs (Phase 8).
+
+**Gate:** ruff 0 errors; 86 passed; **coverage 95.6%**. All files ≤ 150 LOC.
