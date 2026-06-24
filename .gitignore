@@ -1,0 +1,24 @@
+# Secrets — NEVER commit these (a leaked key drains credit and tanks the rubric)
+.env
+claude api key.txt
+*.key
+*.pem
+credentials.json
+token.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# Runtime artifacts (logs are regenerated; keep results/ for submission but ignore noise)
+logs/
+results/**/*.tmp
+.ipynb_checkpoints/

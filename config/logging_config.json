@@ -1,0 +1,11 @@
+{
+  "version": "1.00",
+  "log_dir": "logs",
+  "results_dir": "results",
+  "level": "INFO",
+  "jsonl_event_file": "events.jsonl",
+  "human_log_file": "robocop.log",
+  "console": true,
+  "rotate_max_bytes": 5000000,
+  "rotate_backups": 5
+}
