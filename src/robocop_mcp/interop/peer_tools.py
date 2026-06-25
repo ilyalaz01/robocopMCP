@@ -11,7 +11,7 @@ from __future__ import annotations
 from .capability_handshake import our_capabilities
 from .constants import INTEGRITY_PROMISE
 from .game_adapter import ROLE_FROM_STR
-from .hashing import ruleset_hash
+from .hashing import ruleset_hash as _compute_ruleset_hash
 from .session import MatchSession
 
 
@@ -35,16 +35,16 @@ class PeerToolService:
         repo, urls, students = self._identity
         return {"ok": True, "capabilities": our_capabilities(self.s.our_team, repo, urls, students)}
 
-    def propose_ruleset(self, token: str, ruleset_name: str, ruleset_hash_: str) -> dict:
+    def propose_ruleset(self, token: str, ruleset_name: str, ruleset_hash: str) -> dict:
         err = self._auth(token)
         return err or {"ok": True, "our_ruleset_name": "cop-robber-grid-v1",
-                       "our_ruleset_hash": ruleset_hash()}
+                       "our_ruleset_hash": _compute_ruleset_hash()}
 
-    def accept_ruleset(self, token: str, ruleset_name: str, ruleset_hash_: str) -> dict:
+    def accept_ruleset(self, token: str, ruleset_name: str, ruleset_hash: str) -> dict:
         err = self._auth(token)
         if err:
             return err
-        ok = self.s.accept_ruleset(ruleset_name, ruleset_hash_)
+        ok = self.s.accept_ruleset(ruleset_name, ruleset_hash)
         return {"ok": ok, "terminal": None if ok else "protocol_failure"}
 
     def exchange_team_identity(self, token: str, team_name: str, students=None,

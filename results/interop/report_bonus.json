@@ -1,0 +1,109 @@
+{
+  "report_type": "bonus_game",
+  "groups": {
+    "group_1": "il-nv-ai",
+    "group_2": "team-beta"
+  },
+  "github_repo_group_1": "https://github.com/ilyalaz01/robocopMCP",
+  "github_repo_group_2": "",
+  "mcp_url_group_1_cop": "",
+  "mcp_url_group_1_thief": "",
+  "mcp_url_group_2_cop": "",
+  "mcp_url_group_2_thief": "",
+  "timezone": "Asia/Jerusalem",
+  "students_group_1": [
+    {
+      "id": "212177943",
+      "name": "Ilya Lazarev"
+    },
+    {
+      "id": "316350768",
+      "name": "Nadav Goldin"
+    }
+  ],
+  "students_group_2": [],
+  "ruleset_name": "cop-robber-grid-v1",
+  "ruleset_hash": "sha256:290bf7b5bbc33a8fb358c1e8c137e1f01b9a793305f202a6d2c11cf1887f6918",
+  "role_schedule": {
+    "sub_games_1_to_3": {
+      "team_a": "cop",
+      "team_b": "robber"
+    },
+    "sub_games_4_to_6": {
+      "team_a": "robber",
+      "team_b": "cop"
+    }
+  },
+  "seed_protocol": "commit_reveal",
+  "sub_games": [
+    {
+      "sub_game_index": 1,
+      "terminal_reason": "cop_capture",
+      "winner_role": "cop",
+      "scores": {
+        "cop": 20,
+        "robber": 5
+      },
+      "log_hash": "sha256:d9c653a3190d5a5149ecbdbd9b2957a0a9dd7c72df4c5a1884d09158ffd5fa3f"
+    },
+    {
+      "sub_game_index": 2,
+      "terminal_reason": "cop_capture",
+      "winner_role": "cop",
+      "scores": {
+        "cop": 20,
+        "robber": 5
+      },
+      "log_hash": "sha256:18e9282dbd2974c7f01ff2c7aadc08f7786504e48f44a15464835e15f58cf8f6"
+    },
+    {
+      "sub_game_index": 3,
+      "terminal_reason": "cop_capture",
+      "winner_role": "cop",
+      "scores": {
+        "cop": 20,
+        "robber": 5
+      },
+      "log_hash": "sha256:48aa321f3df0a575c877fe1bb06af3979ce9bb987dd635ebc4c6ad37e06aca02"
+    },
+    {
+      "sub_game_index": 4,
+      "terminal_reason": "cop_capture",
+      "winner_role": "cop",
+      "scores": {
+        "cop": 20,
+        "robber": 5
+      },
+      "log_hash": "sha256:579529dd4065ed463063555329575185cbdafd28fcc19833ed85048f3a046d32"
+    },
+    {
+      "sub_game_index": 5,
+      "terminal_reason": "cop_capture",
+      "winner_role": "cop",
+      "scores": {
+        "cop": 20,
+        "robber": 5
+      },
+      "log_hash": "sha256:ccc03d056eb660d7b725ce7a28f7587f8aedcb619034617b729e3ee1eef537c7"
+    },
+    {
+      "sub_game_index": 6,
+      "terminal_reason": "cop_capture",
+      "winner_role": "cop",
+      "scores": {
+        "cop": 20,
+        "robber": 5
+      },
+      "log_hash": "sha256:7d507810ae8b33c06a1f41b387fdcabbd447b0a55673f0b8230f87d745b5c591"
+    }
+  ],
+  "totals_by_group": {
+    "il-nv-ai": 75,
+    "team-beta": 75
+  },
+  "bonus_claim": {
+    "il-nv-ai": 5,
+    "team-beta": 5
+  },
+  "mutual_agreement": false
+}
