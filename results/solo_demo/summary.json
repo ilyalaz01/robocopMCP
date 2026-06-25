@@ -1,0 +1,64 @@
+{
+  "match_id": "solo_demo",
+  "sub_games": [
+    {
+      "index": 0,
+      "outcome": "thief_win",
+      "moves": 25,
+      "cop_score": 5,
+      "thief_score": 10,
+      "valid": true
+    },
+    {
+      "index": 1,
+      "outcome": "thief_win",
+      "moves": 25,
+      "cop_score": 5,
+      "thief_score": 10,
+      "valid": true
+    },
+    {
+      "index": 2,
+      "outcome": "cop_win",
+      "moves": 4,
+      "cop_score": 20,
+      "thief_score": 5,
+      "valid": true
+    },
+    {
+      "index": 3,
+      "outcome": "cop_win",
+      "moves": 6,
+      "cop_score": 20,
+      "thief_score": 5,
+      "valid": true
+    },
+    {
+      "index": 4,
+      "outcome": "thief_win",
+      "moves": 25,
+      "cop_score": 5,
+      "thief_score": 10,
+      "valid": true
+    },
+    {
+      "index": 5,
+      "outcome": "cop_win",
+      "moves": 2,
+      "cop_score": 20,
+      "thief_score": 5,
+      "valid": true
+    }
+  ],
+  "valid_sub_games": 6,
+  "totals": {
+    "cop": 75,
+    "thief": 45
+  },
+  "cost": {
+    "api_calls": 298,
+    "input_tokens": 40175,
+    "output_tokens": 6873,
+    "cost_usd": 0.07454
+  }
+}

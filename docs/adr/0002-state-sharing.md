@@ -1,6 +1,7 @@
 # ADR 0002 — Authoritative state sharing across the two MCP servers
 
-**Status:** accepted (local) / proposed (inter-team) · **Date:** 2026-06-25
+**Status:** accepted (local + host-authoritative bonus model) · **Date:** 2026-06-25
+(updated for the inter-team bonus per `_build/SHARED_RULES.md`)
 
 ## Context
 Two MCP servers (Cop `:8001`, Thief `:8002`) must act on one authoritative game
@@ -16,12 +17,23 @@ started in the same Python process and share `mcp.session.REGISTRY`, a dict keye
 against this single source of truth ("mutual position verification"), so neither side can
 desync the state.
 
-**Inter-team play (Phase 11, proposed): a coordinator-hosted authoritative session.** The
-two agents negotiate a *coordinator* (SPEC §7); the coordinator's process hosts the single
-`GameSession`, and the remote agent's orchestrator calls the coordinator's MCP server over
-HTTP with the shared token. Each `move()` is verified host-side before being accepted, and
-`match_digest()` lets the remote side cross-check the state each turn. This keeps one
-authority while both teams play, satisfying the "both email the identical JSON" rule.
+**Inter-team play (bonus): one side HOSTS the authoritative session.** Per
+`_build/SHARED_RULES.md`, the agents settle leadership during negotiation (our agent
+proposes to host, yields gracefully if the other insists). The **host owns the single
+`GameSession`**: it calls its own agent locally and the **remote agent via the remote public
+MCP URL + the remote token**, validates every `move()` host-side, and — crucially — the
+bonus runs in **full-visibility / no-deception** mode (the `bonus` profile, ADR-0003). That
+combination is what makes the result *verifiable by both sides without a trusted referee*:
+with open information and truthful messages there is no hidden state to lie about, so the
+host's authoritative `GameSession` plus each turn's `match_digest()` cross-check are
+sufficient. **The host's orchestrator produces the bonus JSON** (`build_bonus_report`, exact
+schema); both teams email the byte-identical body with `mutual_agreement` set.
+
+*Why full-visibility for the bonus (and why the solo profile stays partial+deceptive):*
+under partial observation + deception, a peer could misreport hidden positions, so an
+identical agreed result would require a trusted host **or** a cryptographic commit-reveal /
+ZKP scheme. Open + truthful play sidesteps that entirely. The solo submission keeps the
+harder Dec-POMDP (partial + deception) because there one system owns the truth.
 
 ## Consequences
 - Local runs are simple, fast, deterministic, and fully testable without a network.

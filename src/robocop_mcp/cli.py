@@ -16,21 +16,23 @@ def main(argv: list[str] | None = None) -> int:
     """Entry point for the ``robocop`` console script."""
     parser = argparse.ArgumentParser(prog="robocop", description="robocopMCP CLI")
     parser.add_argument("--version", action="version", version=f"robocopMCP {__version__}")
+    parser.add_argument("--profile", default=None, choices=["solo", "bonus"],
+                        help="Config profile (default: solo / $ROBOCOP_PROFILE)")
     parser.add_argument("--check-config", action="store_true", help="Validate config files")
     parser.add_argument("--play", action="store_true", help="Run a heuristic series locally")
     args = parser.parse_args(argv)
+    cfg = ConfigManager(profile=args.profile)
 
     if args.check_config:
-        cfg = ConfigManager()
         cfg.game(), cfg.rate_limits(), cfg.logging()
-        print(f"config OK (version {cfg.game()['version']})")
+        print(f"config OK (profile {cfg.profile}, version {cfg.game()['version']})")
         return 0
 
     if args.play:
         # CLI delegates to the SDK only — zero logic here (rubric §3.1).
         from .sdk.sdk import MarlSDK
 
-        result = MarlSDK().run_series()
+        result = MarlSDK(config=cfg).run_series()
         print(f"series {result.match_id}: totals={result.totals}")
         for sg in result.sub_games:
             print(f"  sub-game {sg.index}: {sg.outcome.value} in {sg.moves} moves "

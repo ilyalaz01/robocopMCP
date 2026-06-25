@@ -44,3 +44,14 @@ def test_only_visible_barriers_reported() -> None:
     obs = build_observation(b, state, Role.COP, radius=1)
     assert (2, 3) in obs.visible_barriers
     assert (0, 0) not in obs.visible_barriers  # out of the cop's window
+
+
+def test_full_visibility_sees_everything() -> None:
+    b = Board(5, 5)
+    state = GameState(cop=Position(0, 0), thief=Position(4, 4))
+    state.barriers = {Position(2, 2), Position(3, 1)}
+    obs = build_observation(b, state, Role.COP, radius=1, full=True)
+    # Opponent always visible, whole board visible, all barriers reported.
+    assert obs.opponent_pos == (4, 4)
+    assert len(obs.visible_cells) == 25
+    assert set(obs.visible_barriers) == {(2, 2), (3, 1)}

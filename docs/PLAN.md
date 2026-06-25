@@ -83,8 +83,9 @@ MCP tools (per server): negotiate_propose/respond/confirm, observe, read_message
 Recorded under `docs/adr/`. Index:
 
 - **0001** — Tooling & repo bootstrap (uv, git-init-local, in-place build).
-- **0002** — In-process SessionRegistry for local two-server state sharing.
-- (further ADRs appended as autonomous decisions are made.)
+- **0002** — In-process SessionRegistry locally; host-authoritative session for the bonus.
+- **0003** — Config profiles (solo vs bonus): visibility, deception, varied starts,
+  constrained negotiation.
 
 ## 7. Deployment (target; Phase 11)
 

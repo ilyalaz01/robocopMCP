@@ -79,7 +79,7 @@ plt.tight_layout(); plt.savefig(ASSETS / "vision_coverage.png", dpi=120); plt.sh
 """
 
 COST = """from robocop_mcp.reporting.summary import token_cost
-ev = ROOT / "results" / "series_demo" / "events.jsonl"
+ev = ROOT / "results" / "solo_demo" / "events.jsonl"
 ev = ev if ev.exists() else ROOT / "logs" / "events.jsonl"
 cost = token_cost(ev); print(cost)
 fig, ax = plt.subplots(figsize=(6, 4))

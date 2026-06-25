@@ -13,12 +13,13 @@ from robocop_mcp.mcp.session import SessionRegistry
 from robocop_mcp.orchestrator.negotiation import (
     NegotiationDriver,
     template_speaker,
+    valid_rules,
     write_negotiation_md,
 )
 from robocop_mcp.sdk.sdk import MarlSDK
 
 
-def _drive(base_game_config, tmp_path, stance, max_rounds=4):
+def _drive(base_game_config, tmp_path, stance, max_rounds=4, target=None):
     registry = SessionRegistry()
     registry.create("m-neg", MatchRules.from_config(base_game_config))
     cop = make_server(Role.COP, "t", registry, None)
@@ -28,7 +29,7 @@ def _drive(base_game_config, tmp_path, stance, max_rounds=4):
     async def go():
         async with Client(cop) as cc, Client(thief) as tc:
             driver = NegotiationDriver(cc, tc, "t", "m-neg", jsonl, template_speaker)
-            return await driver.negotiate({"max_barriers": 5}, stance, max_rounds)
+            return await driver.negotiate({"max_barriers": 5}, stance, max_rounds, target)
 
     return asyncio.run(go()), registry
 
@@ -46,6 +47,23 @@ def test_must_concede_path(base_game_config, tmp_path) -> None:
     assert result["conceded"] is True
     # Conceded to the Thief's last counter (more barriers than proposed).
     assert result["agreed_rules"]["max_barriers"] > 5
+
+
+def test_valid_rules_clamps_and_filters() -> None:
+    # Out-of-range barriers clamp to 3..8; bad max_moves snaps to 25; junk dropped.
+    assert valid_rules({"max_barriers": 99}) == {"max_barriers": 8}
+    assert valid_rules({"max_barriers": 1}) == {"max_barriers": 3}
+    assert valid_rules({"max_moves": 40}) == {"max_moves": 25}
+    assert valid_rules({"max_moves": 30}) == {"max_moves": 30}
+    assert valid_rules({"time_limit": 60, "buildings": True}) == {}  # invented rules rejected
+
+
+def test_bonus_target_convergence(base_game_config, tmp_path) -> None:
+    # Even on the counter path, a target forces the agreed values (bonus performance).
+    result, _ = _drive(base_game_config, tmp_path, "counter", max_rounds=4,
+                       target={"max_barriers": 5, "max_moves": 25})
+    assert result["agreed_rules"] == {"max_barriers": 5, "max_moves": 25}
+    assert result["confirmed"] is True
 
 
 def test_template_speaker() -> None:
@@ -67,12 +85,12 @@ def test_sdk_negotiate_applies_agreement(temp_config) -> None:
     assert sdk.rules.max_barriers == result["agreed_rules"]["max_barriers"]
 
 
-def test_sdk_apply_agreement_grid_size(temp_config) -> None:
+def test_sdk_apply_agreement_max_barriers_and_moves(temp_config) -> None:
     sdk = MarlSDK(config=temp_config, token="t")
-    rules = sdk._apply_agreement({"grid_size": [4, 4], "max_barriers": 3})
-    assert rules.grid_width == 4 and rules.grid_height == 4
-    assert rules.thief_start.as_tuple() == (3, 3)
-    assert rules.max_barriers == 3
+    rules = sdk._apply_agreement({"max_barriers": 7, "max_moves": 30})
+    assert rules.max_barriers == 7 and rules.max_moves == 30
+    # Grid is no longer negotiable — unchanged.
+    assert rules.grid_width == 5 and rules.grid_height == 5
 
 
 def test_sdk_run_sub_game(temp_config) -> None:

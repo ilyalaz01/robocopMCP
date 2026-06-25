@@ -110,3 +110,30 @@ def test_persona_distinct(tmp_path, role) -> None:
 
     _engine(tmp_path, create).message(role, {"move_count": 0}, [], None)
     assert role.value.upper() in captured["system"]
+
+
+def test_deception_true_uses_bluff_persona(tmp_path) -> None:
+    captured = {}
+
+    def create(**kw):
+        captured["system"] = kw["system"]
+        return _Resp("msg")
+
+    eng = _engine(tmp_path, create)
+    eng.deception = True
+    eng.message(Role.THIEF, {"move_count": 0}, [], None)
+    assert "bluff" in captured["system"].lower()
+
+
+def test_deception_false_uses_truthful_persona(tmp_path) -> None:
+    captured = {}
+
+    def create(**kw):
+        captured["system"] = kw["system"]
+        return _Resp("msg")
+
+    eng = _engine(tmp_path, create)
+    eng.deception = False
+    eng.message(Role.THIEF, {"move_count": 0}, [], None)
+    system = captured["system"].lower()
+    assert "truthful" in system and "never" in system  # must not lie about position/intent

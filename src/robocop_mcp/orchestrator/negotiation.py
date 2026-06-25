@@ -19,6 +19,28 @@ from .turn_loop import _call
 # A speaker turns (role, intent, detail) into a natural-language line.
 Speaker = Callable[[Role, str, str], str]
 
+# The ONLY negotiable parameters and their valid domains (ADR-0003 / SHARED_RULES).
+# Agents may never invent rules outside this set (no time limits, head starts, etc.).
+_MAX_BARRIERS_RANGE = (3, 8)
+_MAX_MOVES_CHOICES = (25, 30)
+
+
+def valid_rules(rules: dict) -> dict:
+    """Filter + clamp a proposed ruleset to the negotiable domain.
+
+    Unknown keys are dropped; ``max_barriers`` is clamped to 3–8 and
+    ``max_moves`` snapped to {25, 30}. This is what stops the agents agreeing to
+    anything undefined.
+    """
+    out: dict = {}
+    if "max_barriers" in rules:
+        lo, hi = _MAX_BARRIERS_RANGE
+        out["max_barriers"] = max(lo, min(hi, int(rules["max_barriers"])))
+    if "max_moves" in rules:
+        mm = int(rules["max_moves"])
+        out["max_moves"] = mm if mm in _MAX_MOVES_CHOICES else _MAX_MOVES_CHOICES[0]
+    return out
+
 
 def template_speaker(role: Role, intent: str, detail: str) -> str:
     """Deterministic speaker used in tests and as the LLM fallback."""
@@ -39,27 +61,39 @@ class NegotiationDriver:
         self.token, self.session_id, self.jsonl = token, session_id, jsonl
         self.speak = speaker
 
-    async def negotiate(self, proposal: dict, responder_stance: str, max_rounds: int) -> dict:
-        """Negotiate ``proposal``; ``responder_stance`` is 'agree' or 'counter'.
+    async def negotiate(self, proposal: dict, responder_stance: str, max_rounds: int,
+                        target: dict | None = None) -> dict:
+        """Negotiate within the valid domain; ``responder_stance`` is 'agree'/'counter'.
 
-        Returns ``{"agreed_rules", "confirmed", "rounds", "conceded"}``.
+        ``target`` (the bonus profile's converged values) forces the final agreed
+        ruleset so two engines stay identical — the dialogue still happens, it
+        just lands there. Returns ``{agreed_rules, confirmed, rounds, conceded}``.
         """
+        proposal = valid_rules(proposal)
+        base = int(proposal.get("max_barriers", 5))
         await self._propose(self.cop, proposal, "propose its preferred ruleset")
         agreed, conceded, rounds = proposal, False, 0
 
         for r in range(max_rounds):
             rounds = r + 1
             if responder_stance == "agree":
+                if r == 0 and max_rounds > 1:  # one flavour counter so logs aren't sterile
+                    counter = valid_rules({"max_barriers": base + 1, "max_moves": 25})
+                    await self._respond(self.thief, False, counter, "playfully ask for more barriers")
+                    await self._propose(self.cop, proposal, "hold firm and explain the balance")
+                    continue
                 agreed = await self._respond(self.thief, True, {}, "accept the fair proposal")
                 break
-            counter = {"max_barriers": int(proposal.get("max_barriers", 5)) + 1 + r}
-            await self._respond(self.thief, False, counter, "counter with more barriers")
+            counter = valid_rules({"max_barriers": base + 1 + r, "max_moves": 25})
+            await self._respond(self.thief, False, counter, "counter within the agreed range")
             if r == max_rounds - 1:
                 agreed = await self._respond(self.cop, True, {}, "concede gracefully and accept")
                 conceded = True
             else:
                 await self._propose(self.cop, proposal, "argue briefly for its ruleset")
 
+        if target is not None:  # converge on the inter-team agreed values (bonus)
+            agreed = valid_rules(target)
         confirmed = await self._confirm()
         log_event(self.jsonl, "negotiation_end", session_id=self.session_id,
                   agreed=agreed, confirmed=confirmed, rounds=rounds, conceded=conceded)

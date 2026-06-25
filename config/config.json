@@ -1,10 +1,15 @@
 {
   "version": "1.00",
+  "profile": "solo",
   "grid_size": [5, 5],
   "max_moves": 25,
   "num_games": 6,
   "max_barriers": 5,
   "vision_radius": 1,
+  "visibility": "partial",
+  "deception": true,
+  "start_mode": "seeded_random",
+  "start_seed": 42,
   "scoring": { "cop_win": 20, "thief_win": 10, "cop_loss": 5, "thief_loss": 5 },
   "llm": {
     "model": "claude-haiku-4-5-20251001",
@@ -15,7 +20,8 @@
   "negotiation": {
     "max_rounds": 6,
     "allow_rule_changes": true,
-    "negotiable": ["max_barriers", "grid_size", "num_cops"],
+    "negotiable": ["max_barriers", "max_moves"],
+    "negotiable_ranges": { "max_barriers": [3, 8], "max_moves": [25, 30] },
     "inviolable": ["thief_must_evade", "turn_based", "capture_ends_subgame"]
   },
   "q_learning": {

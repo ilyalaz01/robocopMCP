@@ -39,7 +39,7 @@ class LanguageEngine:
     """Generates and interprets natural-language messages via Haiku."""
 
     def __init__(self, gatekeeper, create_fn, model: str, max_tokens: int,
-                 temperature: float, timeout: int, jsonl=None) -> None:
+                 temperature: float, timeout: int, jsonl=None, deception: bool = True) -> None:
         self.gk = gatekeeper
         self.create = create_fn
         self.model = model
@@ -47,6 +47,8 @@ class LanguageEngine:
         self.temperature = temperature
         self.timeout = timeout
         self.jsonl = jsonl
+        # When False (bonus open-information profile), the truthful persona is used.
+        self.deception = deception
 
     def _complete(self, system: str, user: str) -> str | None:
         """One guarded LLM completion; returns text or ``None`` on any failure."""
@@ -64,7 +66,8 @@ class LanguageEngine:
 
     def message(self, role: Role, obs: dict, opponent_msgs: list, suggestion: str | None) -> str:
         """Generate the agent's message, falling back to a template on failure."""
-        text = self._complete(persona_for(role), _build_context(role, obs, opponent_msgs, suggestion))
+        system = persona_for(role, self.deception)
+        text = self._complete(system, _build_context(role, obs, opponent_msgs, suggestion))
         if text:
             return text
         intent = suggestion or "hold"

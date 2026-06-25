@@ -38,4 +38,5 @@ def build_language_engine(config, jsonl, create_fn=None) -> LanguageEngine:  # p
     return LanguageEngine(
         gatekeeper, create_fn or build_create_fn(), llm["model"], llm["max_tokens"],
         llm["temperature"], llm["timeout_seconds"], jsonl,
+        deception=config.game().get("deception", True),
     )

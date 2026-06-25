@@ -14,7 +14,7 @@ from pathlib import Path
 from fastmcp import Client
 
 from ..constants import Role
-from ..domain.models import MatchRules, Position
+from ..domain.models import MatchRules
 from ..learning.q_learning import QTable
 from ..mcp.server_app import make_server, resolve_token
 from ..mcp.session import SessionRegistry
@@ -76,13 +76,19 @@ class MarlSDK(ReportingMixin):
 
     def negotiate(self, stance: str = "agree", match_id: str = "local",
                   speaker=None, apply: bool = True) -> dict:
-        """Run pre-game rule negotiation; optionally adopt the agreed ruleset."""
+        """Run pre-game rule negotiation; optionally adopt the agreed ruleset.
+
+        In the bonus profile the negotiation converges on the config's
+        ``negotiation.converged`` values so both engines stay identical.
+        """
         session_id = f"{match_id}-neg"
         self.registry.create(session_id, self.rules)
         proposal = {"max_barriers": self.cfg.get("max_barriers", default=5),
-                    "grid_size": list(self.cfg.get("grid_size", default=[5, 5]))}
+                    "max_moves": self.cfg.get("max_moves", default=25)}
+        target = self.cfg.get("negotiation", "converged", default=None)
         max_rounds = self.cfg.get("negotiation", "max_rounds", default=6)
-        result = asyncio.run(self._negotiate(session_id, proposal, stance, max_rounds, speaker))
+        result = asyncio.run(
+            self._negotiate(session_id, proposal, stance, max_rounds, speaker, target))
         write_negotiation_md(self.registry.get(session_id), self.cfg.root / "results", match_id)
         if apply and result["agreed_rules"]:
             self.rules = self._apply_agreement(result["agreed_rules"])
@@ -90,21 +96,19 @@ class MarlSDK(ReportingMixin):
                   result["agreed_rules"], result["confirmed"], result["conceded"])
         return result
 
-    async def _negotiate(self, session_id, proposal, stance, max_rounds, speaker):
+    async def _negotiate(self, session_id, proposal, stance, max_rounds, speaker, target):
         async with Client(self.cop_server) as cop_c, Client(self.thief_server) as thief_c:
             driver = NegotiationDriver(cop_c, thief_c, self.token, session_id, self.jsonl,
                                        speaker or template_speaker)
-            return await driver.negotiate(proposal, stance, max_rounds)
+            return await driver.negotiate(proposal, stance, max_rounds, target)
 
     def _apply_agreement(self, agreed: dict) -> MatchRules:
         """Translate an agreed-rules dict into an effective MatchRules override."""
         changes: dict = {}
         if "max_barriers" in agreed:
             changes["max_barriers"] = int(agreed["max_barriers"])
-        if agreed.get("grid_size"):
-            w, h = (int(v) for v in agreed["grid_size"][:2])
-            changes.update(grid_width=w, grid_height=h,
-                           cop_start=Position(0, 0), thief_start=Position(w - 1, h - 1))
+        if "max_moves" in agreed:
+            changes["max_moves"] = int(agreed["max_moves"])
         return self.rules.with_overrides(**changes)
 
     def run_series(

@@ -8,10 +8,16 @@ reads those files, so the rest of the codebase depends on data, not paths.
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Any
 
 from .version import COMPATIBLE_CONFIG_VERSIONS
+
+# Profile → game-config filename (ADR-0003). Selected via arg / ROBOCOP_PROFILE.
+PROFILE_FILES = {"solo": "config.json", "bonus": "config_bonus.json"}
+_VISIBILITY = {"partial", "full"}
+_START_MODES = {"fixed", "seeded_random", "fixed_pairs"}
 
 
 class ConfigError(RuntimeError):
@@ -39,10 +45,16 @@ class ConfigManager:
     Output: dict-like access to the validated config payloads.
     """
 
-    def __init__(self, config_dir: Path | None = None) -> None:
+    def __init__(self, config_dir: Path | None = None, profile: str | None = None) -> None:
         self._root = _project_root()
         self._dir = Path(config_dir) if config_dir else self._root / "config"
         self._cache: dict[str, dict[str, Any]] = {}
+        # Profile precedence: explicit arg > env var > "solo" default (ADR-0003).
+        self.profile = (profile or os.environ.get("ROBOCOP_PROFILE") or "solo").lower()
+        if self.profile not in PROFILE_FILES:
+            raise ConfigError(
+                f"Unknown profile {self.profile!r}; expected one of {sorted(PROFILE_FILES)}"
+            )
 
     @property
     def root(self) -> Path:
@@ -69,12 +81,26 @@ class ConfigManager:
             )
 
     def game(self) -> dict[str, Any]:
-        """Return the validated main game config (``config.json``)."""
+        """Return the validated game config for the active profile (ADR-0003)."""
         if "game" not in self._cache:
-            data = self._load("config.json")
-            self._check_version(data, "config.json")
+            filename = PROFILE_FILES[self.profile]
+            data = self._load(filename)
+            self._check_version(data, filename)
+            self._check_profile(data, filename)
             self._cache["game"] = data
         return self._cache["game"]
+
+    @staticmethod
+    def _check_profile(data: dict[str, Any], where: str) -> None:
+        """Validate the profile-specific keys (visibility / deception / starts)."""
+        vis = data.get("visibility", "partial")
+        if vis not in _VISIBILITY:
+            raise ConfigError(f"Invalid visibility {vis!r} in {where}; expected {_VISIBILITY}")
+        if not isinstance(data.get("deception", True), bool):
+            raise ConfigError(f"'deception' must be a boolean in {where}")
+        mode = data.get("start_mode", "fixed")
+        if mode not in _START_MODES:
+            raise ConfigError(f"Invalid start_mode {mode!r} in {where}; expected {_START_MODES}")
 
     def rate_limits(self) -> dict[str, Any]:
         """Return the validated rate-limit config (``rate_limits.json``)."""

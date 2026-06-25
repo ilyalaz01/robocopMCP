@@ -1,0 +1,71 @@
+{
+  "group_name": "il-nv-ai",
+  "students": [
+    {
+      "id": "212177943",
+      "name": "Ilya Lazarev"
+    },
+    {
+      "id": "316350768",
+      "name": "Nadav Goldin"
+    }
+  ],
+  "github_repo": "https://github.com/ilyalaz01/robocopMCP",
+  "cop_mcp_url": "http://127.0.0.1:8001/mcp/",
+  "thief_mcp_url": "http://127.0.0.1:8002/mcp/",
+  "timezone": "Asia/Jerusalem",
+  "sub_games": [
+    {
+      "index": 0,
+      "outcome": "thief_win",
+      "moves": 25,
+      "cop_score": 5,
+      "thief_score": 10,
+      "void": false
+    },
+    {
+      "index": 1,
+      "outcome": "thief_win",
+      "moves": 25,
+      "cop_score": 5,
+      "thief_score": 10,
+      "void": false
+    },
+    {
+      "index": 2,
+      "outcome": "cop_win",
+      "moves": 4,
+      "cop_score": 20,
+      "thief_score": 5,
+      "void": false
+    },
+    {
+      "index": 3,
+      "outcome": "cop_win",
+      "moves": 6,
+      "cop_score": 20,
+      "thief_score": 5,
+      "void": false
+    },
+    {
+      "index": 4,
+      "outcome": "thief_win",
+      "moves": 25,
+      "cop_score": 5,
+      "thief_score": 10,
+      "void": false
+    },
+    {
+      "index": 5,
+      "outcome": "cop_win",
+      "moves": 2,
+      "cop_score": 20,
+      "thief_score": 5,
+      "void": false
+    }
+  ],
+  "totals": {
+    "cop": 75,
+    "thief": 45
+  }
+}

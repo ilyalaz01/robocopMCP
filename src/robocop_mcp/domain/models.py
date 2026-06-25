@@ -49,12 +49,21 @@ class MatchRules:
     thief_loss: int
     cop_start: Position
     thief_start: Position
+    # Profile-driven (ADR-0003): observation + messaging mode and start scheme.
+    visibility: str = "partial"  # "partial" | "full"
+    deception: bool = True
+    start_mode: str = "fixed"  # "fixed" | "seeded_random" | "fixed_pairs"
+    start_seed: int = 0
+    start_pairs: tuple[tuple[Position, Position], ...] = ()
 
     @classmethod
     def from_config(cls, game_cfg: dict) -> MatchRules:
         """Build rules from the validated game-config dict (config is the source)."""
         w, h = game_cfg["grid_size"]
         sc = game_cfg["scoring"]
+        pairs = tuple(
+            (Position(*c), Position(*t)) for c, t in game_cfg.get("start_pairs", [])
+        )
         return cls(
             grid_width=w, grid_height=h,
             max_moves=game_cfg["max_moves"], max_barriers=game_cfg["max_barriers"],
@@ -63,6 +72,11 @@ class MatchRules:
             cop_win=sc["cop_win"], thief_win=sc["thief_win"],
             cop_loss=sc["cop_loss"], thief_loss=sc["thief_loss"],
             cop_start=Position(0, 0), thief_start=Position(w - 1, h - 1),
+            visibility=game_cfg.get("visibility", "partial"),
+            deception=game_cfg.get("deception", True),
+            start_mode=game_cfg.get("start_mode", "fixed"),
+            start_seed=game_cfg.get("start_seed", 0),
+            start_pairs=pairs,
         )
 
     def with_overrides(self, **changes) -> MatchRules:

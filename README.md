@@ -45,10 +45,10 @@ that may be honest or deceptive. The system addresses the resulting challenges:
   (the MCP *client*); the two FastMCP servers expose **tools**, never a model. Each turn the
   active agent's Haiku call produces a message (`send_message`) and the Q-table supplies the
   move (`suggest_move` → `move`) — *language and movement do not fight* (SPEC §5).
-- **Ambiguity & deception.** The Thief is explicitly prompted to **bluff** about its
-  position; the receiver runs an LLM **interpreter** that maps the message to a coarse belief
-  (`NORTH/SOUTH/.../UNKNOWN`), which is logged each turn. Real excerpt
-  (`results/series_demo/transcript.md`):
+- **Ambiguity & deception (solo profile).** The Thief is explicitly prompted to **bluff**
+  about its position; the receiver runs an LLM **interpreter** that maps the message to a
+  coarse belief (`NORTH/SOUTH/.../UNKNOWN`), logged each turn. Real excerpt
+  (`results/solo_demo/transcript.md`):
 
   > **thief**: "Ha! You'll never catch me, copper—I'm heading straight for the docks!"
   > **cop**: "I'm cutting northeast to head them off at the docks before they reach the water."
@@ -57,12 +57,35 @@ that may be honest or deceptive. The system addresses the resulting challenges:
 - **Mutual understanding without a referee.** Authoritative state lives in one
   `GameSession`; every `move()` is **re-validated** server-side ("mutual position
   verification") so neither side can desync. `match_digest()` lets either side cross-check.
-- **Rule negotiation.** Before play, the agents argue in natural language and reach
-  **explicit mutual confirmation**; our persona proposes its own rules, argues briefly, and
-  **concedes gracefully** after `max_rounds` (never deadlocks). Real dialogue:
-  `results/series_demo/negotiation.md`.
+- **Rule negotiation (constrained).** Before play, the agents argue in natural language over
+  **only** the two negotiable parameters — `max_barriers ∈ 3..8` and `max_moves ∈ {25,30}`
+  (they may never invent undefined rules) — and reach **explicit mutual confirmation**. Our
+  persona proposes its own rules, argues briefly, and **concedes gracefully** after
+  `max_rounds` (never deadlocks). Real dialogue: `results/solo_demo/negotiation.md`.
 - **Never hangs.** Every LLM call has a timeout and a **deterministic fallback**; every
   fallback, retry, and queue event is logged.
+
+### Peer-to-peer trust & verifiability (why the bonus profile exists)
+
+A single system can own the truth, so the solo submission is a genuine **Dec-POMDP**:
+partial observation + deception. But **two independent systems cannot agree on an identical
+result under hidden state + lying** — with no trusted referee, either peer could misreport a
+position it alone can see. The only ways to make such a match verifiable are (a) a **trusted
+host** that owns the authoritative state, or (b) a **cryptographic commit-reveal / ZKP**
+scheme where each side commits to its move before reveal. Both are heavyweight.
+
+The clean alternative — and what both teams agreed (`_build/SHARED_RULES.md`) — is **open
+information + truthful messages**: with the full board visible and no bluffing, there is no
+hidden state to lie about, so a single **host-authoritative `GameSession`** plus per-turn
+`match_digest()` cross-checks is sufficient for both teams to compute and email the
+**byte-identical** bonus JSON. This is the **bonus profile**. See `docs/adr/0002-state-sharing.md`.
+
+**Two profiles** (`docs/adr/0003-config-profiles.md`), selected by `--profile` / `ROBOCOP_PROFILE`:
+
+| Profile | Visibility | Deception | Starts | Use |
+| --- | --- | --- | --- | --- |
+| `solo` (default) | partial (`vision_radius=1`) | allowed (bluffing) | `seeded_random` (seed 42) | the mandatory Dec-POMDP submission |
+| `bonus` | **full** (open info) | **off** (truthful) | `fixed_pairs` (SHARED_RULES) | the host-authoritative inter-team match |
 
 Architecture (C4 + ADRs): `docs/PLAN.md`. The orchestrator is parameterized by two server
 URLs, so the same code runs locally or against another team's servers for the bonus.
@@ -71,9 +94,12 @@ URLs, so the same code runs locally or against another team's servers for the bo
 
 ## 3. Results & visualizations
 
-A full **negotiated 6-sub-game series with real Haiku** (`scripts/run_demo.py`) produced the
-artifacts in `results/series_demo/` — transcript, negotiation, board PNGs, run summary, and
-the dry-run report — at a total cost of **$0.031** (124 API calls, tokens logged).
+A full **negotiated 6-sub-game series with real Haiku** (`scripts/run_demo.py`) produces the
+artifacts under `results/solo_demo/` (solo profile) and `results/bonus_demo/` (bonus profile)
+— transcript, negotiation, board PNGs, run summary, and the dry-run report — at a few cents
+total (tokens logged). With **varied per-sub-game starts** the six games now genuinely differ
+(distinct trajectories, and a mix of cop and thief wins) instead of the same game replayed
+six times. The `bonus_demo` transcript shows **truthful** messages under full visibility.
 
 | Learning curves | Q vs heuristic | Parameter sensitivity |
 | --- | --- | --- |
@@ -81,7 +107,7 @@ the dry-run report — at a total cost of **$0.031** (124 API calls, tokens logg
 
 | Board screenshot (no GUI) | Observation sensitivity | Token cost |
 | --- | --- | --- |
-| ![board](results/series_demo/sg0_start.png) | ![vis](assets/vision_coverage.png) | ![cost](assets/token_cost.png) |
+| ![board](results/solo_demo/sg0_start.png) | ![vis](assets/vision_coverage.png) | ![cost](assets/token_cost.png) |
 
 **Key findings** (notebook `notebooks/analysis.ipynb`, rubric §8/§10):
 - Cop win-rate falls **1.0 → 0.4** as the grid grows 4→6 — the Thief evades more on larger
@@ -90,11 +116,11 @@ the dry-run report — at a total cost of **$0.031** (124 API calls, tokens logg
 - Larger `vision_radius` raises observability, reducing reliance on the language channel.
 - API cost is **near-zero** (Haiku, ~150 tokens/turn) — see the token-cost figure.
 
-**Proof of real MCP communication** — a slice of `results/series_demo/events.jsonl`
+**Proof of real MCP communication** — a slice of `results/solo_demo/events.jsonl`
 (244 `tool_call`, 54 `state`, 48 `turn` events for one series):
 
 ```json
-{"event":"tool_call","role":"thief","tool":"send_message","session_id":"series_demo-sg0", ...}
+{"event":"tool_call","role":"thief","tool":"send_message","session_id":"solo_demo-sg0", ...}
 {"event":"tool_call","role":"thief","tool":"move","direction":"S","ok":true, ...}
 {"event":"api_call","service":"anthropic","input_tokens":122,"output_tokens":31, ...}
 ```
@@ -121,8 +147,10 @@ deterministic templates (logged as `llm_fallback`) and the pipeline still comple
 
 ```bash
 uv run robocop --check-config           # validate the versioned config files
-uv run robocop --play                   # full 6-sub-game series over MCP (heuristic, no LLM)
-uv run python scripts/run_demo.py       # negotiated series with REAL Haiku + all artifacts
+uv run robocop --play                   # solo profile: 6 varied sub-games over MCP (no LLM)
+uv run robocop --play --profile bonus   # bonus profile: full visibility, fixed start pairs
+uv run python scripts/run_demo.py        # solo: negotiated series with REAL Haiku + artifacts
+uv run python scripts/run_demo.py bonus  # bonus: full-visibility / truthful series + artifacts
 uv run python -m robocop_mcp.mcp.cop_server     # start the Cop MCP server (:8001)
 uv run python -m robocop_mcp.mcp.thief_server   # start the Thief MCP server (:8002)
 uv run pytest                           # tests + coverage (≥ 85%)
@@ -156,11 +184,11 @@ reject old clients.
 
 ## 7. Examples
 
-- **Negotiation transcript:** `results/series_demo/negotiation.md`
-- **Gameplay transcript (with bluffs + beliefs):** `results/series_demo/transcript.md`
-- **Board screenshots:** `results/series_demo/sg*_start.png`, `sg*_end.png`
-- **Run summary + token cost:** `results/series_demo/summary.md`
-- **Report (dry-run):** `results/series_demo/report_internal.json`
+- **Negotiation transcript:** `results/solo_demo/negotiation.md`
+- **Gameplay transcript (with bluffs + beliefs):** `results/solo_demo/transcript.md`
+- **Board screenshots:** `results/solo_demo/sg*_start.png`, `sg*_end.png`
+- **Run summary + token cost:** `results/solo_demo/summary.md`
+- **Report (dry-run):** `results/solo_demo/report_internal.json`
 
 ## 8. Project structure
 

@@ -1,77 +1,72 @@
 # MORNING BRIEF — robocopMCP
 
-**Date:** 2026-06-25 (overnight autonomous build) · **Group:** il-nv-ai
+**Date:** 2026-06-25 · **Group:** il-nv-ai
 
 ---
 
 ## TL;DR
 
-**Phases 0–10 are complete and green.** The full pipeline works end-to-end: two agents
-negotiate rules in natural language over **two MCP servers**, play a 6-sub-game pursuit with
-**real Claude Haiku** messages (the Thief bluffs) and **Q-learning** moves, and the Cop builds
-the JSON report. Logs, transcripts, board screenshots, graphs, and a research notebook are all
-generated. Nothing is blocking except the three **Phase 11 "DO WITH ILYA"** items below.
+**Phases 0–10 complete and pushed to GitHub.** A later session added the **inter-team bonus
+profile** (open information + truthful messages) alongside the solo Dec-POMDP profile, and
+fixed the "6 identical sub-games" defect with **varied per-sub-game starts**. Everything is
+green. The only remaining work is the Phase 11 hand-offs that need the other team / external
+accounts.
 
-- **Tests:** 145 passed · **coverage 95.8%** (≥ 85%) · **ruff:** 0 errors · every code file ≤ 150 LOC.
-- **No secrets committed** (`.env` + key file git-ignored; verified).
-- **11 commits**, one per phase, clean history. Full detail in `_build/PROGRESS_LOG.md`.
+- **Tests:** 166 passed · **coverage ≥ 96%** · **ruff:** 0 errors · every code file ≤ 150 LOC.
+- **No secrets committed** (`.env` + key file git-ignored; verified). Repo is on `main`.
 
-## What works (verified tonight)
+## Two profiles (ADR-0003) — selected by `--profile` / `ROBOCOP_PROFILE`
+
+| Profile | Visibility | Deception | Starts | Demo artifacts |
+| --- | --- | --- | --- | --- |
+| `solo` (default) | partial (`vision_radius=1`) | allowed (bluffing) | `seeded_random` (seed 42) | `results/solo_demo/` |
+| `bonus` | **full** (open info) | **off** (truthful) | `fixed_pairs` (SHARED_RULES) | `results/bonus_demo/` |
+
+## What works (verified)
 
 | Capability | Evidence |
 | --- | --- |
-| Two FastMCP HTTP servers + token auth | bound on :8001/:8002; in-memory MCP `Client` integration tests |
-| Real natural-language play (with deception) | `results/series_demo/transcript.md` — Thief bluffs about position |
-| Natural-language rule negotiation + graceful concession | `results/haiku_neg/negotiation.md` (Cop concedes after 6 rounds) |
-| Q-learning + heuristic baseline | `results/qtables/`, `assets/learning_curve.png`, `q_vs_heuristic.png` |
-| API Gatekeeper (rate-limit/queue/retry/token logging) | `shared/gatekeeper.py` + tests; tokens in `events.jsonl` |
-| Reporting (exact schema) + Gmail dry-run | `results/series_demo/report_internal.json`, `email_body.txt` |
-| Board screenshots (no GUI) | `results/series_demo/sg*_{start,end}.png` (12 PNGs) |
-| Research notebook + sensitivity + cost | `notebooks/analysis.ipynb` (executed, 0 errors), `assets/*.png` |
-| Full series cost | **$0.031** for 124 Haiku calls (logged) |
+| Varied starts → 6 DIFFERENT sub-games | `results/solo_demo/summary.md` — 3 thief wins, 3 cop wins (moves 25/25/4/6/25/2) |
+| Solo deception (bluffing) | `results/solo_demo/transcript.md` — Thief bluffs; Cop calls it a "misdirect" |
+| Bonus truthful + full visibility | `results/bonus_demo/transcript.md` — Thief honestly says "off I go southbound" and does |
+| Constrained negotiation (no invented rules) | `results/{solo,bonus}_demo/negotiation.md` — only barriers (3–8) + moves (25/30); bonus converges to 5/25 |
+| Host-authoritative bonus design | `docs/adr/0002-state-sharing.md`; integration test `tests/integration/test_bonus_pipeline.py` |
+| Exact-schema bonus report | `sdk.build_bonus_report(...)` (mutual_agreement set) |
+| Research notebook + graphs + cost | `notebooks/analysis.ipynb` (executed, 0 errors); `assets/*.png` |
 
-## What still needs YOU (Phase 11 — needs accounts / the other team / the lecture)
+## What still needs YOU (Phase 11 — needs the other team / accounts)
 
-1. **Push to GitHub.** The repo is committed locally but has **no remote** (I don't have
-   auth). Run:
-   ```bash
-   git remote add origin https://github.com/ilyalaz01/robocopMCP.git
-   git push -u origin main
-   ```
-   Confirm `.env` and `claude api key.txt` are NOT pushed (they're git-ignored — verified).
+1. **Confirm `_build/SHARED_RULES.md` with Team B** — fill in their group code, repo, MCP URLs,
+   token, and students (the exchange checklist at the bottom). The 6 start pairs and converged
+   values (max_barriers 5, max_moves 25) are already wired into `config/config_bonus.json`.
+2. **Live Gmail OAuth send** — code-ready (`reporting/gmail_client.py`, mocked-tested). Needs
+   `credentials.json` + browser consent → `token.json`, then `send_report(series, dry_run=False)`.
+   Body is JSON only. Recipient `rmisegal+uoh26b@gmail.com` is in config.
+3. **Cloud deploy + run the bonus match.** Expose both MCP servers publicly (ngrok/host) with
+   the revocable token; exchange URLs with Team B. The **host** runs the bonus profile
+   (`ROBOCOP_PROFILE=bonus`), calls its own agent locally + the remote agent over HTTP, and
+   produces the bonus JSON; **both teams email the byte-identical body** with `mutual_agreement`.
 
-2. **Live Gmail OAuth send.** Code is ready (`reporting/gmail_client.py`, tested with a
-   mocked service; `send_report(dry_run=False)`). To send for real you need the browser
-   consent flow per `google-api-installation-guide.md`: place `credentials.json`, run the
-   OAuth flow to mint `token.json`, then call `send_report(series, dry_run=False)`. The
-   email body is **JSON only** (parseable). Recipient `rmisegal+uoh26b@gmail.com` is in config.
-
-3. **Cloud deploy + inter-team bonus.** The orchestrator is already **parameterized by two
-   URLs** and the token is revocable. To run the bonus: expose both servers publicly (ngrok
-   or a host), exchange URLs + token with the other group, finalize the coordination model in
-   `docs/adr/0002-state-sharing.md`, run the split series, and have **both groups email the
-   identical JSON** (`build_bonus_report` already produces the exact schema). See SPEC §12.
-
-## Suggested first 10 minutes when you wake up
+## First 10 minutes when you wake up
 
 ```bash
-uv run pytest                      # confirm 145 green locally
-uv run robocop --play              # watch a full series over MCP (no API cost)
-uv run python scripts/run_demo.py  # optional: regenerate Haiku artifacts (~$0.03)
-open results/series_demo/transcript.md          # read the agents talking/bluffing
-open results/haiku_neg/negotiation.md           # read the rule negotiation
-open assets/sensitivity.png                     # the headline research figure
+uv run pytest                                   # 166 green
+uv run robocop --play                           # solo series over MCP (no API cost) — now 6 varied games
+ROBOCOP_PROFILE=bonus uv run robocop --play     # bonus profile (full visibility), fixed pairs
+cat results/solo_demo/summary.md                # 3 thief / 3 cop wins (varied starts work)
+open results/bonus_demo/transcript.md           # truthful, open-information play
+open results/solo_demo/transcript.md            # deception / bluffing
+open assets/sensitivity.png                     # headline research figure
 ```
 
-## Notes / decisions made autonomously (all logged as ADRs)
+## Decisions logged as ADRs
 
-- **ADR-0001** — uv tooling, local git (no remote tonight), in-place build, secret handling.
-- **ADR-0002** — in-process `SessionRegistry` for local play; coordinator-hosted session
-  proposed for inter-team (finalize with the other team).
-- Cop wins the demo series 6–0: that's the **trained Q-policy dominating an open 5×5**, not a
-  bug — the sensitivity figure shows the Thief evading more as the board grows (win-rate
-  1.0→0.4 at 6×6). The professor grades orchestration, not the scoreline.
-- `logs/` is git-ignored (regenerable); the gradeable human-readable logs + a trimmed
-  `events.jsonl` are committed under `results/`.
+- **ADR-0001** — uv tooling, secret handling, in-place build.
+- **ADR-0002** — in-process SessionRegistry locally; **host-authoritative** session for the bonus
+  (open + truthful is why it's verifiable without a referee; partial+deception would need a
+  trusted host or commit-reveal/ZKP).
+- **ADR-0003** — solo vs bonus config profiles: visibility, deception, varied starts, constrained
+  negotiation.
 
-**Status: ready for review and the Phase 11 hand-offs. Sleep well — it all works.** 🚓💨
+**Status: solo submission done + pushed; bonus profile code-complete and demonstrated locally.
+Only the inter-team exchange + live send remain (need Team B / accounts).** 🚓💨

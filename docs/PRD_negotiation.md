@@ -9,11 +9,16 @@ coordinates the loop.
 
 ## What is negotiated
 - **Greeting / consent** ("want to play?" → yes).
-- **Coordinator** — who announces turns / drives the loop.
-- **Starting positions** — shared seed or explicit cells.
-- **Rule tweaks within bounds:** `negotiable = [max_barriers, grid_size, num_cops]` may
-  change if BOTH agree; `inviolable = [thief_must_evade, turn_based, capture_ends_subgame]`
-  must not.
+- **Coordinator** — who hosts the authoritative session (relevant for the bonus; our agent
+  proposes to host and yields gracefully).
+- **Rule tweaks — STRICTLY bounded (ADR-0003):** only `max_barriers ∈ 3..8` and
+  `max_moves ∈ {25, 30}` may change. `valid_rules()` clamps/filters every proposal so the
+  agents can **never invent undefined rules** (no time limits, head starts, "buildings",
+  boundary markers, etc.). `inviolable = [thief_must_evade, turn_based, capture_ends_subgame]`
+  (plus `open_information, no_deception` in the bonus profile).
+- **Convergence target (bonus):** the negotiation is a brief, lively performance that lands
+  on the SHARED_RULES converged values (`max_barriers 5, max_moves 25`) so two independent
+  engines stay identical.
 - **Explicit confirmation** — no sub-game starts until **both** call `negotiate_confirm`.
 
 ## Persona (Ilya's directive)

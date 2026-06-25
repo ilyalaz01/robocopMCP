@@ -5,6 +5,44 @@ coverage + lint status.
 
 ---
 
+## 2026-06-25 (session 2) — Bonus profile + varied starts ✅
+
+**Context:** add an inter-team "bonus" profile (open information + truthful messages) beside
+the solo Dec-POMDP profile, and fix the "6 identical sub-games" defect. Driven by
+`_build/SHARED_RULES.md` (provided by Ilya). Decisions: **ADR-0003** (profiles) + finalized
+**ADR-0002** (host-authoritative bonus).
+
+**Done**
+- **Config profiles:** `config/config.json` (solo: `visibility=partial`, `deception=true`,
+  `start_mode=seeded_random`, `start_seed=42`; negotiable narrowed to `[max_barriers,
+  max_moves]`). New `config/config_bonus.json` (full/truthful, `fixed_pairs` + the 6 start
+  pairs + converged 5/25 from SHARED_RULES). `ConfigManager(profile=…)` (env `ROBOCOP_PROFILE`)
+  + profile-key validation.
+- **Full visibility:** `build_observation(..., full=True)` returns the whole board; wired via
+  `MatchRules.visibility`. **Truthful mode:** new truthful personas; `persona_for(role,
+  deception)`; `LanguageEngine.deception` flag (from config).
+- **Varied starts:** `domain/starts.py` (`generate_starts`: distinct seeded_random / fixed_pairs);
+  orchestrator resets each sub-game to its own start. Solo now yields **6 different games**
+  (3 thief / 3 cop wins) instead of 6 identical.
+- **Constrained negotiation:** `valid_rules()` clamps/filters to `max_barriers∈3..8`,
+  `max_moves∈{25,30}` — no invented rules. `negotiate(..., target=…)` lands the bonus on 5/25.
+  Tightened the negotiator persona so even the free-text stays on barriers/moves.
+- **Bonus run:** finalized ADR-0002 (host owns the session, calls remote agent over HTTP, open+
+  truthful ⇒ verifiable without a referee). Integration test runs a full bonus series (both
+  agents local, mocked LLM) + exact-schema bonus report.
+- **Artifacts:** regenerated `results/solo_demo/` (varied, real Haiku, $0.075) and
+  `results/bonus_demo/` (truthful/full-vis, $0.096); both with clean negotiation.md; events.jsonl
+  saved. Removed stale `results/series_demo/`. Re-executed the notebook (0 errors). README +
+  PRDs + PLAN + MORNING_BRIEF updated (P2P trust/verifiability analysis, two profiles).
+
+**Issue fixed:** the Haiku negotiator initially wandered into invented rules (head starts, time
+limits, park boundaries) in its *messages* even though the structured outcome was valid →
+tightened `NEGOTIATOR_PERSONA` to discuss only barriers + move counts, regenerated dialogues.
+
+**Gate:** ruff 0 errors; **166 passed**; **coverage 96.2%**. All files ≤ 150 LOC.
+
+---
+
 ## 2026-06-25 — Phase 0: Scaffold, docs, config, safety ✅
 
 **Done**

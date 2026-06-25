@@ -1,0 +1,60 @@
+{
+  "version": "1.00",
+  "profile": "bonus",
+  "grid_size": [5, 5],
+  "max_moves": 25,
+  "num_games": 6,
+  "max_barriers": 5,
+  "vision_radius": 1,
+  "visibility": "full",
+  "deception": false,
+  "start_mode": "fixed_pairs",
+  "start_seed": 0,
+  "start_pairs": [
+    [[0, 0], [4, 4]],
+    [[4, 0], [0, 4]],
+    [[2, 0], [2, 4]],
+    [[0, 4], [4, 0]],
+    [[4, 4], [0, 0]],
+    [[0, 2], [4, 2]]
+  ],
+  "scoring": { "cop_win": 20, "thief_win": 10, "cop_loss": 5, "thief_loss": 5 },
+  "llm": {
+    "model": "claude-haiku-4-5-20251001",
+    "max_tokens": 1024,
+    "temperature": 0.7,
+    "timeout_seconds": 30
+  },
+  "negotiation": {
+    "max_rounds": 6,
+    "allow_rule_changes": true,
+    "negotiable": ["max_barriers", "max_moves"],
+    "negotiable_ranges": { "max_barriers": [3, 8], "max_moves": [25, 30] },
+    "converged": { "max_barriers": 5, "max_moves": 25 },
+    "inviolable": ["thief_must_evade", "turn_based", "capture_ends_subgame",
+                   "open_information", "no_deception"]
+  },
+  "q_learning": {
+    "alpha": 0.1,
+    "gamma": 0.9,
+    "epsilon": 0.2,
+    "epsilon_decay": 0.999,
+    "min_epsilon": 0.01,
+    "episodes": 5000,
+    "step_penalty": -1.0,
+    "capture_reward": 50.0,
+    "survive_reward": 1.0
+  },
+  "servers": {
+    "cop_host": "127.0.0.1",
+    "cop_port": 8001,
+    "thief_host": "127.0.0.1",
+    "thief_port": 8002,
+    "auth_token_env": "ROBOCOP_MCP_TOKEN",
+    "default_token": "il-nv-ai-local-dev-token"
+  },
+  "report": {
+    "recipient_email": "rmisegal+uoh26b@gmail.com",
+    "timezone": "Asia/Jerusalem"
+  }
+}

@@ -36,8 +36,9 @@ class GameEngine:
             self.state.thief = thief
 
     def observe(self, role: Role) -> Observation:
-        """Partial observation for ``role`` within ``vision_radius``."""
-        return build_observation(self.board, self.state, role, self.rules.vision_radius)
+        """Observation for ``role`` — partial (vision_radius) or full per the profile."""
+        full = self.rules.visibility == "full"
+        return build_observation(self.board, self.state, role, self.rules.vision_radius, full)
 
     def _digest(self) -> dict:
         """Compact authoritative snapshot for logging / mutual verification."""
