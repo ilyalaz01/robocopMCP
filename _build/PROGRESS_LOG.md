@@ -5,6 +5,34 @@ coverage + lint status.
 
 ---
 
+## 2026-06-25 (session 4) — Interop PlayerAgent, PRIORITY 1 ✅
+
+**Goal:** an additive, separate "interop" agent that speaks the opponent team's pure
+peer-to-peer (no-referee) protocol and REUSES our GameEngine. Solo + host-bonus untouched.
+Source of truth: `_build/opponent/{assignment.md,cop_rob_game_rules.md}`.
+
+**Done (PRIORITY 1 core)**
+- `interop/constants.py`: opponent direction vocabulary (up / up-right diagonal / …),
+  terminal-code table (§25), canonical ruleset name + integrity promise.
+- `interop/translation.py`: `OpponentProfile` + `Translator` — chess coords (a1..e5),
+  outgoing phrasing ("I move up-right diagonal."), incoming parse with **longest-match**
+  direction extraction (authoritative), non-authoritative coordinate capture, block/loss/
+  unclear. Profile-driven so it adapts to any opponent.
+- `interop/game_adapter.py`: `InteropGame` over our `GameEngine` — the two interop deltas
+  (ADR-0005): **blocks impassable to BOTH players** (`for_thief=True` for both) and **25 full
+  rounds = 50 plies**; emits the opponent's exact terminal codes.
+- `interop/peer_agent.py`: role-flexible `PlayerAgent` (own inferred state, legal-only
+  actions, phrase/parse) + `play_sub_game` driver.
+- **LOCAL PROOF (integration):** two PlayerAgents play full P2P sub-games over the message
+  protocol (mocked LLM), exchanging NL actions and **agreeing on the identical terminal
+  state** — no central referee. Also verified with a custom OpponentProfile (adaptation).
+- 17 interop tests (translation roundtrip, blocks-both, terminal codes, self-play agreement).
+
+**Decisions:** ADR-0005 (interop adapter reuses engine; documents the blocks-both + 50-ply
+adaptations + bit-exact items) — written in PRIORITY 3.
+
+**Gate:** ruff 0; **195 passed**; **coverage 94.8%**; all files ≤ 150 LOC. Solo/bonus untouched.
+
 ## 2026-06-25 (session 3) — Strategic barriers via PBRS (ADR-0004) ✅
 
 **Goal:** make the Cop use barriers intelligently (only when they trap) without
