@@ -36,6 +36,12 @@ TERMINAL_CODES = {
     "technical_failure_rerun": None, "protocol_failure": None,
 }
 
+
+def outcome_for(code: str | None) -> str | None:
+    """Winner side ('cop'/'robber') for a terminal-reason code, else None (their §25)."""
+    return TERMINAL_CODES.get(code) if code else None
+
+
 # Canonical pre-game texts (assignment.md §5.3 / §5.9). Bit-exact items — see ADR-0005.
 RULESET_NAME = "cop-robber-grid-v1"
 ACCEPT_TEMPLATE = "I accept ruleset {name} with hash {hash}."

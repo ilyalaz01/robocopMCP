@@ -9,7 +9,7 @@ via ``get_capabilities`` so any opponent can adapt (capability_handshake).
 from __future__ import annotations
 
 from .capability_handshake import our_capabilities
-from .constants import INTEGRITY_PROMISE
+from .constants import INTEGRITY_PROMISE, outcome_for
 from .game_adapter import ROLE_FROM_STR, STR_FROM_ROLE
 from .hashing import ruleset_hash as _compute_ruleset_hash
 from .session import MatchSession
@@ -119,7 +119,8 @@ class PeerToolService:
         async with TheirClient(url, tok) as their:  # deliver to THEIR receive_action_message
             their_resp = await their.receive_action_message(
                 sub_game_index, round_index, STR_FROM_ROLE[self.s.agent.role], message)
-        return {"ok": True, "our_message": message, "our_terminal": code,
+        return {"ok": True, "status": "ack", "our_message": message,
+                "our_terminal": bool(code), "outcome": outcome_for(code), "reason": code,
                 "their_response": their_resp}
 
     def receive_action_message(self, token: str, sub_game_index: int, round_index: int,
@@ -129,8 +130,10 @@ class PeerToolService:
             return err
         res = self.s.agent.observe(message, ROLE_FROM_STR[actor])
         if not res["ack"]:
-            return {"ok": False, "retry": True, "reason": "unclear_action"}
-        return {"ok": True, "parsed": res["parsed"]["type"], "terminal": res["code"]}
+            return {"ok": False, "status": "retry", "retry": True, "reason": "unclear_action"}
+        code = res["code"]  # their terminal-reason code, or None while the game continues
+        return {"ok": True, "status": "ack", "parsed": res["parsed"]["type"],
+                "terminal": bool(code), "outcome": outcome_for(code), "reason": code}
 
     def request_action_retry(self, token: str, sub_game_index: int, round_index: int,
                              reason: str) -> dict:
