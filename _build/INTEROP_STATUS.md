@@ -46,18 +46,20 @@ host-bonus systems are **untouched** and remain the graded submission. Source of
 
 ---
 
-## ⚠️ BIT-EXACT items to CONFIRM with the opponent (mismatch → series voids, 0)
+## ✅ BIT-EXACT items — CONFIRMED & aligned to Team B's spec (commit 7c583eb)
 
-Each uses a **documented default** (so we run today) but MUST be byte-identical on both sides:
+All four critical items now match Team B's confirmed spec exactly (golden tests lock them):
 
-| Item | Our default | Confirm |
-| --- | --- | --- |
-| **ruleset canonical string** | `hashing.OFFICIAL_RULESET` object → `canonical_json` (sorted keys, `(",",":")`, UTF-8) | the EXACT string/object they hash |
-| **ruleset_hash format** | `sha256:<hex>` | prefix + lowercase hex |
-| **seed formula** | `SHA256(nonce_A‖nonce_B‖str(i)‖ruleset_hash)` (WITH ruleset_hash) | their assignment §5.7 omits `ruleset_hash` — **resolve which** |
-| **‖ concatenation** | UTF-8 string concat; `i` as decimal string; nonce as hex string | their exact byte/string representation |
-| **seed→cell derivation** | walk seed hex, index `k→(k%w,k//w)` over `a1,b1,…`, resample Robber | their exact PRNG/derivation (the most likely mismatch) |
-| **result/report hash** | `hash_payload` (same canonical JSON + SHA-256) | their canonicalization |
+| Item | Implementation (bit-exact) |
+| --- | --- |
+| **ruleset name** | `cop-robber-grid-v1` |
+| **ruleset_hash** | `a0df8e78…fc35140` = SHA-256 of `cop_rob_game_rules.md` as-is, **raw 64-hex, no prefix** (our copy hashes byte-for-byte to it) |
+| **seed** | `sha256( bytes.fromhex(nonce_A) + bytes.fromhex(nonce_B) + index.to_bytes(4,"big") + ruleset_hash.lower().utf8 )` → hex. Team A nonce first. |
+| **placement** | `random.Random(bytes.fromhex(seed))`; rank-major cells `a1..e5` (files faster); `cop=choice`, `robber=choice(others)` |
+| **result/report hash** | `sha256( json.dumps(report, sort_keys=True, separators=(",",":")).encode() ).hexdigest()` — raw 64-hex, **no prefix**; `mutual_agreement` excluded before hashing |
+
+Minor (consistent with the above, confirm only if their report embeds them): the commitment is
+`sha256(nonce.utf8)` raw hex, and each sub-game `log_hash` uses the same raw-hex canonical hash.
 
 ## ⚠️ Other items needing Ilya / opponent before a live run
 - **Opponent MCP URLs + token**, and our public URLs (deploy) — exchange checklist in
