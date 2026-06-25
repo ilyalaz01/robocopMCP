@@ -29,6 +29,9 @@ def make_peer_server(session: MatchSession, token: str, repo_url: str = "",
     mcp: FastMCP = FastMCP("robocop-interop")
     for name in PEER_TOOLS:
         mcp.add_tool(Tool.from_function(getattr(service, name), name=name))
+    # Additive stateless plain-JSON-RPC route for non-MCP clients (Team B); /mcp/ untouched.
+    from .plain_rpc import add_plain_rpc
+    add_plain_rpc(mcp, service, set(PEER_TOOLS))
     return mcp
 
 
