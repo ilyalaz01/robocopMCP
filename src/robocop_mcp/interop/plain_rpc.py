@@ -33,8 +33,10 @@ def adapt_args(name: str, args: dict) -> dict:
     return a
 
 
-def dispatch(service, body: dict, allowed) -> dict:
+async def dispatch(service, body: dict, allowed) -> dict:
     """Run one plain JSON-RPC call against ``service``; return a JSON-RPC result/error."""
+    import inspect
+
     method = body.get("method")
     params = body.get("params") or {}
     if method == "tools/call":  # standard MCP shape
@@ -47,6 +49,8 @@ def dispatch(service, body: dict, allowed) -> dict:
     token = args.pop("token", None)
     try:
         result = getattr(service, name)(token, **args)
+        if inspect.isawaitable(result):  # async tools (e.g. take_turn)
+            result = await result
     except TypeError as exc:
         return {"error": {"code": -32602, "message": f"bad params for {name}: {exc}"}}
     return {"result": result}
@@ -64,5 +68,5 @@ def add_plain_rpc(mcp, service, allowed) -> None:
             return JSONResponse({"jsonrpc": "2.0", "id": None,
                                  "error": {"code": -32700, "message": "parse error"}},
                                 status_code=400)
-        out = dispatch(service, body, allowed)
+        out = await dispatch(service, body, allowed)
         return JSONResponse({"jsonrpc": "2.0", "id": body.get("id"), **out})

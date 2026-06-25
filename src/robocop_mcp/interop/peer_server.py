@@ -19,6 +19,7 @@ PEER_TOOLS = (
     "start_sub_game", "receive_action_message", "request_action_retry",
     "confirm_action_parse", "confirm_sub_game_result", "get_sub_game_log",
     "get_final_report", "confirm_final_report", "send_final_report_email",
+    "take_turn",
 )
 
 

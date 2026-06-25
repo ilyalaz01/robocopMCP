@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from .capability_handshake import our_capabilities
 from .constants import INTEGRITY_PROMISE
-from .game_adapter import ROLE_FROM_STR
+from .game_adapter import ROLE_FROM_STR, STR_FROM_ROLE
 from .hashing import ruleset_hash as _compute_ruleset_hash
 from .session import MatchSession
 
@@ -81,16 +81,43 @@ class PeerToolService:
 
     # --- game -----------------------------------------------------------
     def start_sub_game(self, token: str, sub_game_index: int, role: str,
-                       initial_positions: dict, seed_data: dict | None = None) -> dict:
+                       initial_positions: dict, seed_data: dict | None = None,
+                       opponent_url: str | None = None, opponent_token: str | None = None,
+                       opponent_rpc: str | None = None) -> dict:
         err = self._auth(token)
         if err:
             return err
+        if opponent_url:  # remember their callable endpoint for our outbound moves
+            self.s.opponent_url = opponent_url
+            self.s.opponent_token = opponent_token or self.s.opponent_token
+            self.s.opponent_rpc = opponent_rpc or self.s.opponent_rpc
         t = self.s.agent.translator
         cop = t.coord_to_cell(initial_positions["cop"])
         rob = t.coord_to_cell(initial_positions["robber"])
         from ..domain.models import Position
         self.s.agent.start_sub_game(ROLE_FROM_STR[role], Position(*cop), Position(*rob), self.s.rules)
         return {"ok": True}
+
+    async def take_turn(self, token: str, sub_game_index: int, round_index: int,
+                        actor: str, opponent_url: str | None = None,
+                        opponent_token: str | None = None) -> dict:
+        """Decide OUR move, deliver it to the opponent's server, return their reply."""
+        err = self._auth(token)
+        if err:
+            return err
+        url = opponent_url or self.s.opponent_url
+        tok = opponent_token or self.s.opponent_token
+        if not url:
+            return {"ok": False, "error": "no_opponent_url"}
+        if self.s.agent.game is None:
+            return {"ok": False, "error": "no_active_sub_game"}
+        message, code = self.s.agent.act()  # our action on our own state
+        from .their_client import TheirClient
+        async with TheirClient(url, tok) as their:
+            their_resp = await their.receive_action_message(
+                sub_game_index, round_index, STR_FROM_ROLE[self.s.agent.role], message)
+        return {"ok": True, "our_message": message, "our_terminal": code,
+                "their_response": their_resp}
 
     def receive_action_message(self, token: str, sub_game_index: int, round_index: int,
                                actor: str, message: str) -> dict:

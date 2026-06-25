@@ -38,6 +38,10 @@ class MatchSession:
         # Final-report hash exchange (interop finalize is never auto-send).
         self.final_hash: str | None = None
         self.opponent_report_hash: str | None = None
+        # Opponent's callable endpoint (for our outbound moves via take_turn).
+        self.opponent_url: str | None = None
+        self.opponent_token: str | None = None
+        self.opponent_rpc: str | None = None
 
     def set_opponent(self, team_name: str) -> None:
         """Record the opponent team and compute deterministic A/B ordering."""

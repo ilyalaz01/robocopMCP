@@ -19,7 +19,6 @@ import sys
 from pathlib import Path
 
 import uvicorn
-from fastmcp import Client
 
 from robocop_mcp.interop.commit_reveal import commitment, generate_nonce
 from robocop_mcp.interop.constants import INTEGRITY_PROMISE
@@ -69,8 +68,7 @@ async def main(their_url: str, their_token: str, their_team: str) -> None:
         await asyncio.sleep(0.1)
     print(f"our server up on :{PORT}/mcp/  token={OUR_TOKEN}  (expose via cloudflared)")
 
-    async with Client(their_url) as c:
-        their = TheirClient(c, their_token)
+    async with TheirClient(their_url, their_token) as their:
         print("propose_ruleset:", await their.propose_ruleset(RULESET_NAME, ruleset_hash()))
         await their.confirm_role_schedule({"team_a": session.team_a})
         await their.confirm_integrity_promise(INTEGRITY_PROMISE)
