@@ -39,7 +39,7 @@ class ReportingMixin:
         return build_bonus_report(series, self.cfg, opponent, mutual_agreement, bonus_claim)  # type: ignore[attr-defined]
 
     def send_report(self, series, report: dict | None = None, dry_run: bool = True,
-                    out_dir: Path | None = None) -> dict:
+                    out_dir: Path | None = None, service_factory=None) -> dict:
         """Cop emails the JSON report — only once all sub-games are valid (SPEC §11)."""
         valid = count_valid(series)
         needed = self.rules.num_games  # type: ignore[attr-defined]
@@ -49,8 +49,9 @@ class ReportingMixin:
         report = report or self.build_internal_report(series)
         recipient = self.cfg.get("report", "recipient_email", default="")  # type: ignore[attr-defined]
         out = out_dir or (self.cfg.root / "results")  # type: ignore[attr-defined]
-        return self._gmail_client().send(report, recipient, dry_run=dry_run, out_dir=out)
+        return self._gmail_client(service_factory).send(
+            report, recipient, dry_run=dry_run, out_dir=out)
 
-    def _gmail_client(self) -> GmailClient:
+    def _gmail_client(self, service_factory=None) -> GmailClient:
         gatekeeper = ApiGatekeeper.from_config(self.cfg, "gmail", self.jsonl)  # type: ignore[attr-defined]
-        return GmailClient(gatekeeper, service_factory=None, jsonl=self.jsonl)  # type: ignore[attr-defined]
+        return GmailClient(gatekeeper, service_factory=service_factory, jsonl=self.jsonl)  # type: ignore[attr-defined]
