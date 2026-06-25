@@ -1,0 +1,49 @@
+{
+  "version": "1.00",
+  "profile": "interop",
+  "ruleset_name": "cop-robber-grid-v1",
+  "ruleset_hash_note": "computed at runtime by interop.hashing.ruleset_hash(); DEFAULT canonicalization — opponent must confirm (see _build/INTEROP_STATUS.md)",
+  "grid_size": [5, 5],
+  "max_rounds": 25,
+  "num_sub_games": 6,
+  "max_barriers": 5,
+  "turn_order": ["robber", "cop"],
+  "movement": {
+    "allow_diagonal": true,
+    "allow_corner_cutting": true,
+    "allow_pass": false,
+    "wrap_around": false,
+    "step_size": 1
+  },
+  "blocks_impassable_to_both": true,
+  "initial_position_policy": "commit_reveal_random_disjoint",
+  "coordinates": { "style": "chess_like", "origin": "a1_bottom_left" },
+  "validation": {
+    "invalid_action_retries": 1,
+    "timeout_retries": 1,
+    "illegal_action_causes_loss": true,
+    "coordinates_in_messages_are_authoritative": false,
+    "central_engine_enabled": false
+  },
+  "timeouts": { "action_timeout_seconds": 60 },
+  "scoring": {
+    "cop_win": { "cop": 20, "robber": 5 },
+    "robber_win": { "cop": 5, "robber": 10 }
+  },
+  "commit_reveal": {
+    "seed_formula": "SHA256(nonce_A || nonce_B || str(sub_game_index) || ruleset_hash)",
+    "seed_formula_note": "WITH ruleset_hash (game-rules 4.5 + assignment 7.3). assignment 5.7 omits it — FLAGGED",
+    "seed_to_cell": "walk seed hex over cells in coordinate order a1,b1,...; index k -> (k%w, k//w); robber resampled until disjoint — DEFAULT, FLAGGED"
+  },
+  "servers": {
+    "host": "127.0.0.1",
+    "port": 8101,
+    "auth_token_env": "ROBOCOP_INTEROP_TOKEN",
+    "default_token": "il-nv-ai-interop-token"
+  },
+  "email_report": {
+    "enabled": true,
+    "recipient": "rmisegal+uoh26b@gmail.com",
+    "body_format": "json_only"
+  }
+}

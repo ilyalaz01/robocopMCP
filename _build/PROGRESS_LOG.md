@@ -33,6 +33,24 @@ adaptations + bit-exact items) — written in PRIORITY 3.
 
 **Gate:** ruff 0; **195 passed**; **coverage 94.8%**; all files ≤ 150 LOC. Solo/bonus untouched.
 
+**Done (PRIORITY 2 + 3, same session)**
+- `capability_handshake.py`: `our_capabilities`, `build_opponent_profile` (adapt or default to
+  opponent docs), deterministic team-name role ordering (`team_order`/`role_for`, 3+3 schedule).
+- `hashing.py` (canonical JSON + SHA-256 + `ruleset_hash`), `commit_reveal.py` (nonce/commit/
+  verify, `derive_seed`, `seed_to_positions`) — **bit-exact, defaulted + flagged**.
+- `session.py` (`MatchSession`) + `peer_tools.py` (`PeerToolService` — the opponent's EXACT 17
+  tool names, token-guarded) + `peer_server.py` (FastMCP, omitted) + `config/config_interop.json`.
+- ADR-0005; **`_build/INTEROP_STATUS.md`** (implemented vs bit-exact items needing opponent
+  confirmation: ruleset string/hash, seed formula §5.7-vs-§7.3, seed→cell derivation, JSON
+  canonicalization, opponent URLs/token). 8 protocol tests.
+
+**Bit-exact stance (per instruction):** documented default + flag in INTEROP_STATUS, don't stop.
+
+**Gate:** ruff 0; **203 passed**; **coverage 91.6%**; all files ≤ 150 LOC. Solo/bonus untouched.
+
+**Note:** Gmail live send timed out waiting on browser consent (no token.json); infra ready,
+re-run `scripts/send_report.py` and complete consent. (Separate from interop.)
+
 ## 2026-06-25 (session 3) — Strategic barriers via PBRS (ADR-0004) ✅
 
 **Goal:** make the Cop use barriers intelligently (only when they trap) without
