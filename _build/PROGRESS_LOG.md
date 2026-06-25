@@ -51,6 +51,16 @@ adaptations + bit-exact items) — written in PRIORITY 3.
 **Note:** Gmail live send timed out waiting on browser consent (no token.json); infra ready,
 re-run `scripts/send_report.py` and complete consent. (Separate from interop.)
 
+**Done (interop finalize — gated, never auto-send)**
+- `interop/finalize.py`: after 6 sub-games, build `results/interop/report_bonus.json`
+  (assignment §18.6 schema), print its **SHA256**, compare via `confirm_final_report`. Email
+  is sent ONLY with explicit `--send`/`dry_run=False` AND matching hashes; **default dry-run**
+  writes `email_body.txt` and sends nothing. Comparable hash EXCLUDES `mutual_agreement`.
+- `confirm_final_report` now compares opponent vs our final hash; `send_final_report_email`
+  tool never actually sends. `scripts/interop_finalize.py` (dry-run by default).
+- 6 finalize tests (dry-run default, mismatch blocks send, send only on flag+match).
+- Gate: ruff 0; **209 passed**; coverage 92.1%; files ≤ 150 LOC. Solo/bonus untouched.
+
 ## 2026-06-25 (session 3) — Strategic barriers via PBRS (ADR-0004) ✅
 
 **Goal:** make the Cop use barriers intelligently (only when they trap) without

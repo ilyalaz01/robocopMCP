@@ -62,9 +62,13 @@ Each uses a **documented default** (so we run today) but MUST be byte-identical 
 ## ⚠️ Other items needing Ilya / opponent before a live run
 - **Opponent MCP URLs + token**, and our public URLs (deploy) — exchange checklist in
   `_build/SHARED_RULES.md`.
-- **Bonus report**: reuse our `reporting.report_builder.build_bonus_report` (exact assignment
-  schema). The interop variant additionally carries `ruleset_name`, `ruleset_hash`,
-  `role_schedule`, `seed_protocol` — small extension to add when wiring the live series.
+- **Bonus report + GATED email (implemented):** `interop/finalize.py` builds
+  `results/interop/report_bonus.json` (assignment §18.6 schema + `ruleset_name/hash`,
+  `role_schedule`, `seed_protocol`), prints its **SHA256**, and compares with the opponent via
+  `confirm_final_report`. It **NEVER auto-sends**: default is dry-run (writes the JSON-only
+  `email_body.txt`); email is sent ONLY with explicit `--send`/`dry_run=False` **AND** matching
+  hashes. The comparable hash EXCLUDES `mutual_agreement` (that flag is the *result* of
+  agreeing — documented default, confirm with opponent). Run: `scripts/interop_finalize.py`.
 - **Live turn loop over two MCP servers** (the cross-process orchestration of
   `receive_action_message`/`confirm_action_parse` round-by-round) — the *logic* is proven by
   the in-process self-play; the cross-process driver + retry/timeout escalation is the

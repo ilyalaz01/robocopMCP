@@ -131,7 +131,15 @@ class PeerToolService:
         return self._auth(token) or {"ok": True, "sub_games": self.s.results}
 
     def confirm_final_report(self, token: str, report_hash: str) -> dict:
-        return self._auth(token) or {"ok": True, "report_hash": report_hash}
+        err = self._auth(token)
+        if err:
+            return err
+        self.s.opponent_report_hash = report_hash
+        match = self.s.final_hash is not None and self.s.final_hash == report_hash
+        return {"ok": True, "match": match, "our_hash": self.s.final_hash}
 
     def send_final_report_email(self, token: str, report_json: dict) -> dict:
-        return self._auth(token) or {"ok": True, "queued": True}
+        # Interop NEVER auto-sends: emailing requires manual confirmation + a hash
+        # match (interop.finalize with --send). This tool only acknowledges.
+        return self._auth(token) or {"ok": True, "sent": False,
+                                     "note": "manual confirmation required (interop.finalize --send)"}

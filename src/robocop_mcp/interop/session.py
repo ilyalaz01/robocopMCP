@@ -35,6 +35,9 @@ class MatchSession:
         self.opp_commitments: dict[int, str] = {}
         self.opp_nonces: dict[int, str] = {}
         self.results: list[dict] = []
+        # Final-report hash exchange (interop finalize is never auto-send).
+        self.final_hash: str | None = None
+        self.opponent_report_hash: str | None = None
 
     def set_opponent(self, team_name: str) -> None:
         """Record the opponent team and compute deterministic A/B ordering."""
