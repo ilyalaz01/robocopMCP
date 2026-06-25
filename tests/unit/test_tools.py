@@ -107,6 +107,24 @@ def test_suggest_move_uses_qtable(base_game_config, tmp_path) -> None:
     assert cop.suggest_move("m1", TOKEN)["suggestion"] == "NE"
 
 
+def test_enriched_suggest_places_barrier_when_cornering(base_game_config, tmp_path) -> None:
+    import numpy as np
+
+    from robocop_mcp.learning.q_learning import QTable, action_space
+    from robocop_mcp.learning.shaping import cop_state
+
+    reg = SessionRegistry()
+    sess = reg.create("m1", MatchRules.from_config(base_game_config))
+    sess.engine.reset(cop=Position(1, 0), thief=Position(0, 0))  # thief cornered, cop adjacent
+    acts = action_space(Role.COP)
+    qt = QTable(acts, epsilon=0.0)
+    row = np.zeros(len(acts))
+    row[acts.index("PLACE_BARRIER")] = 10.0
+    qt.q[cop_state(sess.engine, enriched=True)] = row
+    cop = AgentToolService(reg, Role.COP, TOKEN, tmp_path / "e.jsonl", qtable=qt, enrich=True)
+    assert cop.suggest_move("m1", TOKEN)["suggestion"] == "PLACE_BARRIER"
+
+
 def test_match_digest(setup) -> None:
     _, cop, _, _ = setup
     d = cop.match_digest("m1", TOKEN)["digest"]

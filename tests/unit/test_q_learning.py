@@ -22,6 +22,23 @@ def test_encode_state_clamps() -> None:
     assert encode_state(Position(9, 9), Position(0, 0), clamp=4) == (-4, -4)
 
 
+def test_encode_state_with_extra_feature() -> None:
+    plain = encode_state(Position(0, 0), Position(2, 3))
+    enriched = encode_state(Position(0, 0), Position(2, 3), extra=1)
+    assert plain == (2, 3)
+    assert enriched == (2, 3, 1)
+
+
+def test_save_load_enriched_3tuple_key(tmp_path) -> None:
+    table = QTable(["A", "B"])
+    table.q[(1, -2, 2)] = np.array([0.5, 1.5])
+    path = tmp_path / "qt.json"
+    table.save(path)
+    loaded = QTable.load(path)
+    assert (1, -2, 2) in loaded.q
+    assert np.allclose(loaded.row((1, -2, 2)), [0.5, 1.5])
+
+
 def test_bellman_update_known_value() -> None:
     table = QTable(["A", "B"], alpha=0.5, gamma=0.9)
     table.row((1, 0))  # ensure state exists

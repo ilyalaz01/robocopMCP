@@ -5,6 +5,43 @@ coverage + lint status.
 
 ---
 
+## 2026-06-25 (session 3) — Strategic barriers via PBRS (ADR-0004) ✅
+
+**Goal:** make the Cop use barriers intelligently (only when they trap) without
+reward-hacking, and prove it in the logs. Additive + config-gated; solo/bonus untouched.
+
+**Done**
+- **ADR-0004**: diagnosis (no reward credit; state can't see cornering; barriers
+  suboptimal on open board) + PBRS fix (policy-invariant, no spam) + honest outcome.
+- **`config/config_advanced.json`** (copy of solo + `reward_shaping{enabled,weight:0.3}`,
+  `enriched_cop_state`, `corner_fraction:0.3`, `qtable_dir:qtables_advanced`).
+  `ConfigManager`/CLI add the `advanced` profile.
+- **PBRS + enrichment + curriculum** in `learning/shaping.py` (`Phi=-(thief escape
+  count)`, escape buckets, enriched cop state) and `trainer.py` (`shaping_weight`,
+  `enrich_cop`, `corner_fraction` — all default OFF so solo/bonus rng/behaviour are
+  byte-identical). `encode_state`/`QTable.save|load` generalized to variable-length
+  state keys (2-tuple tables load unchanged). Enriched `suggest_move` wired
+  (`AgentToolService.enrich`, `make_server`, SDK `qtable_dir`).
+- **A/B study** (`learning/ab_barriers.py`) + notebook §7 + `assets/barrier_ab.png`.
+- Advanced tables trained/saved to `results/qtables_advanced/` (+ `ab_barriers.json`).
+- **Barrier demo** (`scripts/barrier_demo.py` → `results/barrier_demo/`): a scripted
+  cornering sub-game over the real engine — Cop walls a cornered Thief's escape
+  (escapes 3→2) and captures; transcript + PNGs.
+- README subsection "Strategic barrier use via PBRS". 8 new tests.
+
+**Honest result (the finding):** PBRS is policy-invariant, so **shaping-only matches
+the baseline exactly** (100% capture, ~5 moves) and induces **zero** barrier use —
+on an open 5×5 walling is genuinely suboptimal (Thief-moves-first + equal speed), so
+a correct learner won't place barriers (no reward-hacking). The escape-bucket
+enrichment *fragments* the table and hurts capture (76% / 47%). Per the task's
+fallback, shaping stays OFF by default and the mechanic is shown via the constructed
+demo. Recorded honestly in ADR-0004.
+
+**Gate:** ruff 0 errors; **178 passed**; **coverage 95.9%**. All files ≤ 150 LOC.
+Solo/bonus configs + results + qtables verified unchanged (git).
+
+---
+
 ## 2026-06-25 (session 2) — Bonus profile + varied starts ✅
 
 **Context:** add an inter-team "bonus" profile (open information + truthful messages) beside

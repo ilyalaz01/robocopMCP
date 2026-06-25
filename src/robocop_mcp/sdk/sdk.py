@@ -58,9 +58,15 @@ class MarlSDK(ReportingMixin):
         )
 
     def _load_qtables(self) -> dict:
-        """Load trained Q-tables from ``results/qtables`` if present (else heuristic)."""
+        """Load trained Q-tables from the profile's dir if present (else heuristic).
+
+        Solo/bonus use ``results/qtables``; the advanced profile sets
+        ``q_learning.qtable_dir = qtables_advanced`` (ADR-0004) so its enriched
+        tables never overwrite or affect the solo/bonus ones.
+        """
         out: dict = {}
-        base = self.cfg.root / "results" / "qtables"
+        qdir = self.cfg.get("q_learning", "qtable_dir", default="qtables")
+        base = self.cfg.root / "results" / qdir
         for role, name in ((Role.COP, "qtable_cop.json"), (Role.THIEF, "qtable_thief.json")):
             path = Path(base) / name
             if path.is_file():

@@ -54,7 +54,9 @@ def make_server(
     cfg = config or ConfigManager()
     jsonl = setup_logging(cfg)
     tok = token or resolve_token(cfg)
-    service = AgentToolService(registry or REGISTRY, role, tok, jsonl, qtable=qtable)
+    # Advanced profile enriches the Cop's Q-state (ADR-0004); off for solo/bonus.
+    enrich = bool(cfg.get("q_learning", "enriched_cop_state", default=False))
+    service = AgentToolService(registry or REGISTRY, role, tok, jsonl, qtable=qtable, enrich=enrich)
 
     mcp: FastMCP = FastMCP(f"robocop-{role.value}")
     for name in _SHARED_TOOLS:

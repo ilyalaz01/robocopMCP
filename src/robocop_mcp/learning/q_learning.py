@@ -23,11 +23,18 @@ def action_space(role: Role) -> list[str]:
     return [*moves, PLACE_BARRIER] if role is Role.COP else moves
 
 
-def encode_state(own: Position, target: Position, clamp: int = 4) -> tuple[int, int]:
-    """Clamped relative displacement target−own → a small discrete state key."""
+def encode_state(
+    own: Position, target: Position, extra: int | None = None, clamp: int = 4
+) -> tuple[int, ...]:
+    """Clamped relative displacement target−own → a small discrete state key.
+
+    ``extra`` appends ONE optional compact feature (ADR-0004 — the Thief's
+    bucketed escape count for the enriched Cop state). When ``None`` the key is
+    the original 2-tuple, so existing (solo/bonus) tables are byte-identical.
+    """
     dx = max(-clamp, min(clamp, target.x - own.x))
     dy = max(-clamp, min(clamp, target.y - own.y))
-    return (dx, dy)
+    return (dx, dy) if extra is None else (dx, dy, extra)
 
 
 class QTable:
@@ -42,15 +49,15 @@ class QTable:
         self.alpha, self.gamma = alpha, gamma
         self.epsilon, self.epsilon_decay, self.min_epsilon = epsilon, epsilon_decay, min_epsilon
         self.rng = rng or np.random.default_rng()
-        self.q: dict[tuple[int, int], np.ndarray] = {}
+        self.q: dict[tuple[int, ...], np.ndarray] = {}
 
-    def row(self, state: tuple[int, int]) -> np.ndarray:
+    def row(self, state: tuple[int, ...]) -> np.ndarray:
         """Return (creating if needed) the action-value row for ``state``."""
         if state not in self.q:
             self.q[state] = np.zeros(len(self.actions), dtype=float)
         return self.q[state]
 
-    def select(self, state: tuple[int, int], legal: list[int], explore: bool = True) -> int:
+    def select(self, state: tuple[int, ...], legal: list[int], explore: bool = True) -> int:
         """Epsilon-greedy action index restricted to ``legal`` actions."""
         if not legal:
             return 0
@@ -62,7 +69,7 @@ class QTable:
         masked[legal] = row[legal]
         return int(np.argmax(masked))
 
-    def update(self, s: tuple[int, int], a: int, reward: float, s_next: tuple[int, int]) -> None:
+    def update(self, s: tuple[int, ...], a: int, reward: float, s_next: tuple[int, ...]) -> None:
         """Bellman update: Q(s,a) ← Q(s,a) + α·[r + γ·max Q(s',·) − Q(s,a)]."""
         row = self.row(s)
         best_next = float(np.max(self.row(s_next)))
@@ -77,17 +84,18 @@ class QTable:
         payload = {
             "actions": self.actions,
             "params": {"alpha": self.alpha, "gamma": self.gamma, "epsilon": self.epsilon},
-            "q": {f"{s[0]},{s[1]}": row.tolist() for s, row in self.q.items()},
+            # Keys join all state elements → handles 2-tuple (solo/bonus) and the
+            # enriched 3-tuple (advanced, ADR-0004) identically.
+            "q": {",".join(str(v) for v in s): row.tolist() for s, row in self.q.items()},
         }
         Path(path).parent.mkdir(parents=True, exist_ok=True)
         Path(path).write_text(json.dumps(payload, indent=2))
 
     @classmethod
     def load(cls, path: Path) -> QTable:
-        """Load a table previously written by :meth:`save`."""
+        """Load a table previously written by :meth:`save` (any state arity)."""
         data = json.loads(Path(path).read_text())
         table = cls(data["actions"])
         for key, row in data["q"].items():
-            dx, dy = (int(v) for v in key.split(","))
-            table.q[(dx, dy)] = np.array(row, dtype=float)
+            table.q[tuple(int(v) for v in key.split(","))] = np.array(row, dtype=float)
         return table

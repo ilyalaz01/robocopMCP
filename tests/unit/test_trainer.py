@@ -49,6 +49,34 @@ def test_training_improves_cop_reward(base_game_config) -> None:
     assert h[-q:, 0].mean() > h[:q, 0].mean()
 
 
+def test_run_episode_shaped_enriched_corner(base_game_config) -> None:
+    import numpy as np
+
+    from robocop_mcp.learning.q_learning import QTable, action_space
+
+    rules = _rules(base_game_config, 5)
+    cfg = base_game_config["q_learning"]
+    rng = np.random.default_rng(0)
+    tables = {r: QTable(action_space(r), rng=rng) for r in (Role.COP, Role.THIEF)}
+    acts = {r: action_space(r) for r in (Role.COP, Role.THIEF)}
+    eng = GameEngine(rules)
+    cop_r, thief_r = run_episode(eng, tables, acts, cfg, rng,
+                                 shaping_weight=0.3, enrich_cop=True, corner=True)
+    assert isinstance(cop_r, float)
+    assert eng.state.outcome in (Outcome.COP_WIN, Outcome.THIEF_WIN)
+    # Enriched cop states are 3-tuples; thief states stay 2-tuples.
+    assert all(len(k) == 3 for k in tables[Role.COP].q)
+    assert all(len(k) == 2 for k in tables[Role.THIEF].q)
+
+
+def test_train_advanced_defaults_off_match_baseline(base_game_config) -> None:
+    # With shaping/enrichment/curriculum OFF, training is identical to before:
+    # cop states remain 2-tuples (no behavioural change for solo/bonus).
+    rules = _rules(base_game_config, 4)
+    cop_q, _, _ = train(rules, base_game_config["q_learning"], episodes=60, seed=0)
+    assert all(len(k) == 2 for k in cop_q.q)
+
+
 def test_train_persists_tables(base_game_config, tmp_path) -> None:
     rules = _rules(base_game_config, 4)
     cfg = base_game_config["q_learning"]

@@ -16,7 +16,7 @@ def main(argv: list[str] | None = None) -> int:
     """Entry point for the ``robocop`` console script."""
     parser = argparse.ArgumentParser(prog="robocop", description="robocopMCP CLI")
     parser.add_argument("--version", action="version", version=f"robocopMCP {__version__}")
-    parser.add_argument("--profile", default=None, choices=["solo", "bonus"],
+    parser.add_argument("--profile", default=None, choices=["solo", "bonus", "advanced"],
                         help="Config profile (default: solo / $ROBOCOP_PROFILE)")
     parser.add_argument("--check-config", action="store_true", help="Validate config files")
     parser.add_argument("--play", action="store_true", help="Run a heuristic series locally")

@@ -27,3 +27,7 @@ results/**/*.tmp
 results/appl/
 results/bonus_local/
 results/varcheck/
+
+# Google OAuth client secrets (NEVER commit — public repo)
+client_secret_*.json
+*client_secret*.json

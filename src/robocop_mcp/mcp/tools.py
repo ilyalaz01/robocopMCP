@@ -25,7 +25,8 @@ class AgentToolService(NegotiationMixin):
     """
 
     def __init__(
-        self, registry: SessionRegistry, role: Role, token: str, jsonl_path: Path, qtable=None
+        self, registry: SessionRegistry, role: Role, token: str, jsonl_path: Path,
+        qtable=None, enrich: bool = False,
     ) -> None:
         self.registry = registry
         self.role = role
@@ -33,6 +34,8 @@ class AgentToolService(NegotiationMixin):
         self.jsonl_path = jsonl_path
         # When a trained Q-table is supplied, suggest_move uses it; else heuristic.
         self.qtable = qtable
+        # Advanced profile (ADR-0004): enrich the Cop's Q-state with the escape bucket.
+        self.enrich = enrich
 
     # --- internals -------------------------------------------------------
     def _auth(self, token: str) -> dict | None:
@@ -113,16 +116,23 @@ class AgentToolService(NegotiationMixin):
     def _suggest(self, eng, own: Position, target: Position) -> str | None:
         """Pick an action from the Q-table if present, else the heuristic."""
         if self.qtable is not None:
-            from ..learning.q_learning import encode_state
             from ..learning.trainer import legal_indices
 
             legal = legal_indices(eng, self.role, self.qtable.actions)
-            if legal:
-                idx = self.qtable.select(encode_state(own, target), legal, explore=False)
-                return self.qtable.actions[idx]
-            return None
+            if not legal:
+                return None
+            idx = self.qtable.select(self._encode(eng, own, target), legal, explore=False)
+            return self.qtable.actions[idx]
         action = heuristic_action(self.role, own, target, eng.board, eng.state.barriers)
         return action.value if action else None
+
+    def _encode(self, eng, own: Position, target: Position) -> tuple[int, ...]:
+        """Q-state for the lookup — enriched for the advanced Cop (ADR-0004)."""
+        if self.enrich and self.role is Role.COP:
+            from ..learning.shaping import cop_state
+            return cop_state(eng, True)
+        from ..learning.q_learning import encode_state
+        return encode_state(own, target)
 
     def move(self, session_id: str, token: str, direction: str) -> dict:
         """Validate + apply a one-step move (mutual position verification)."""

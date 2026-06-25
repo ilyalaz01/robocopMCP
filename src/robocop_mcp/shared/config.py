@@ -14,8 +14,12 @@ from typing import Any
 
 from .version import COMPATIBLE_CONFIG_VERSIONS
 
-# Profile → game-config filename (ADR-0003). Selected via arg / ROBOCOP_PROFILE.
-PROFILE_FILES = {"solo": "config.json", "bonus": "config_bonus.json"}
+# Profile → game-config filename (ADR-0003/0004). Selected via arg / ROBOCOP_PROFILE.
+PROFILE_FILES = {
+    "solo": "config.json",
+    "bonus": "config_bonus.json",
+    "advanced": "config_advanced.json",
+}
 _VISIBILITY = {"partial", "full"}
 _START_MODES = {"fixed", "seeded_random", "fixed_pairs"}
 

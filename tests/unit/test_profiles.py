@@ -38,6 +38,18 @@ def test_bonus_matchrules_has_six_distinct_pairs() -> None:
     assert all(c != t for c, t in pairs)  # non-overlapping
 
 
+def test_advanced_profile_shaping_and_enrichment() -> None:
+    cfg = ConfigManager(profile="advanced")
+    g = cfg.game()
+    # Additive: advanced keeps the solo Dec-POMDP (partial + deception) but turns
+    # on PBRS shaping, enriched cop state, and a separate qtable dir (ADR-0004).
+    assert g["visibility"] == "partial" and g["deception"] is True
+    assert g["reward_shaping"] == {"enabled": True, "weight": 0.3}
+    assert g["q_learning"]["enriched_cop_state"] is True
+    assert g["q_learning"]["qtable_dir"] == "qtables_advanced"
+    assert g["q_learning"]["corner_fraction"] == 0.3
+
+
 def test_env_var_selects_profile(monkeypatch) -> None:
     monkeypatch.setenv("ROBOCOP_PROFILE", "bonus")
     assert ConfigManager().profile == "bonus"

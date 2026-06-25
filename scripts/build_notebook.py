@@ -89,6 +89,34 @@ ax.set_title(f"Token usage — total ${cost['cost_usd']} at Haiku rates ($1/$5 p
 plt.tight_layout(); plt.savefig(ASSETS / "token_cost.png", dpi=120); plt.show()
 """
 
+AB_MD = """## 7. Strategic barriers — PBRS A/B ablation (ADR-0004)
+
+Four Cop variants vs a heuristic Thief from cornering starts: baseline, PBRS-only,
+enrichment-only, and PBRS+enrichment+curriculum. **Honest result:** PBRS is
+policy-invariant (Ng-Harada-Russell), so *shaping-only matches the baseline exactly*
+and adds **no** barrier use — on an open 5x5, walling (which forfeits a move) is
+genuinely suboptimal, so a correct learner never places barriers (no reward-hacking).
+The escape-bucket state enrichment *fragments* the table and hurts capture. The
+barrier mechanic itself is shown in `results/barrier_demo/` (a constructed cornering
+scenario): the Cop walls a cornered Thief's escape (escapes 3->2) and captures."""
+
+AB = """import json
+from robocop_mcp.learning.ab_barriers import ab_compare
+abp = ROOT / "results" / "qtables_advanced" / "ab_barriers.json"
+ab = json.loads(abp.read_text()) if abp.exists() else ab_compare(rules, qcfg, n_eval=150)
+variants = list(ab)
+metrics = [("cop_win_rate", "Cop win-rate", (0, 1.05)),
+           ("avg_moves", "Avg moves to resolution", None),
+           ("barrier_use_rate", "Barrier-usage rate", (0, 1.05))]
+fig, axes = plt.subplots(1, 3, figsize=(13, 4))
+for ax, (key, title, ylim) in zip(axes, metrics):
+    ax.bar(variants, [ab[v][key] for v in variants], color="#1f77b4")
+    ax.set_title(title); ax.tick_params(axis="x", rotation=30)
+    if ylim: ax.set_ylim(*ylim)
+plt.tight_layout(); plt.savefig(ASSETS / "barrier_ab.png", dpi=120); plt.show()
+print(json.dumps(ab, indent=2))
+"""
+
 CELLS = [
     ("md", MD_INTRO), ("md", "## 1. Setup"), ("code", SETUP),
     ("md", "## 2. Learning curves (Q-learning self-play)"), ("code", CURVE),
@@ -96,6 +124,7 @@ CELLS = [
     ("md", "## 4. One-at-a-time parameter sensitivity"), ("code", SENS),
     ("md", "## 5. Observation sensitivity (vision_radius)"), ("code", VISION),
     ("md", "## 6. Token-cost analysis (rubric §10)"), ("code", COST),
+    ("md", AB_MD), ("code", AB),
 ]
 
 

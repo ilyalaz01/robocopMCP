@@ -1,0 +1,22 @@
+{
+  "baseline": {
+    "cop_win_rate": 1.0,
+    "avg_moves": 4.95,
+    "barrier_use_rate": 0.0
+  },
+  "shaping_only": {
+    "cop_win_rate": 1.0,
+    "avg_moves": 5.42,
+    "barrier_use_rate": 0.0
+  },
+  "enrich_only": {
+    "cop_win_rate": 0.76,
+    "avg_moves": 18.64,
+    "barrier_use_rate": 0.0
+  },
+  "shaping_enrich": {
+    "cop_win_rate": 0.475,
+    "avg_moves": 15.965,
+    "barrier_use_rate": 0.0
+  }
+}

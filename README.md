@@ -125,6 +125,39 @@ six times. The `bonus_demo` transcript shows **truthful** messages under full vi
 {"event":"api_call","service":"anthropic","input_tokens":122,"output_tokens":31, ...}
 ```
 
+### Strategic barrier use via potential-based reward shaping (ADR-0004)
+
+**Diagnosis.** The trained Cop never places barriers. Three reasons: the reward gives barriers
+no credit (placing forfeits a move toward capture); the Q-state `(dx, dy)` cannot represent
+"the Thief is cornered" (the only time a barrier helps); and on an open 5×5 with an
+equal-speed Cop and *Thief-moves-first*, walling is **genuinely suboptimal** — the Thief flees
+a corner before the Cop can wall, and whenever the Cop is close enough to benefit it can simply
+capture.
+
+**Fix (config-gated `advanced` profile; solo/bonus untouched).** Potential-based reward shaping
+adds to the Cop's reward `F = γ·Φ(s') − Φ(s)` with `Φ(s) = −(Thief escape-move count)`, plus a
+compact escape-bucket state feature and a corner curriculum. PBRS is **policy-invariant** (Ng,
+Harada & Russell 1999) — it guides learning *without* changing the optimal policy, so it cannot
+reward-hack into barrier spam.
+
+**A/B result** (`assets/barrier_ab.png`, four variants vs a heuristic Thief from corner starts):
+
+| Variant | Cop win-rate | Avg moves | Barrier use |
+| --- | --- | --- | --- |
+| baseline | 100% | 5.0 | 0% |
+| **PBRS only** | **100%** | 5.4 | 0% |
+| enrichment only | 76% | 18.6 | 0% |
+| PBRS + enrichment + curriculum | 47% | 16.0 | 0% |
+
+The honest finding: **PBRS-only matches the baseline exactly** (no harm, no reward-hacking) and
+adds **no** barrier use — because barriers are not optimal here, a policy-invariant method
+correctly will not induce them; the state enrichment fragments the table and hurts capture.
+The barrier **mechanic** and its intelligent, *conditional* trigger are therefore shown in a
+constructed cornering scenario (`results/barrier_demo/`): the Cop walls a cornered Thief's
+escape route (escapes **3→2**) and captures two plies later.
+
+![barrier demo](results/barrier_demo/sg0_end.png)
+
 ---
 
 ## 4. Installation

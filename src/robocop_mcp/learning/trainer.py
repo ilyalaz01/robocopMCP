@@ -18,6 +18,7 @@ from ..domain.engine import GameEngine
 from ..domain.models import MatchRules, Position
 from ..domain.rules import can_place_barrier
 from .q_learning import QTable, action_space, encode_state
+from .shaping import cop_state, potential
 
 
 def _own_target(engine: GameEngine, role: Role) -> tuple[Position, Position]:
@@ -25,6 +26,24 @@ def _own_target(engine: GameEngine, role: Role) -> tuple[Position, Position]:
     if role is Role.COP:
         return engine.state.cop, engine.state.thief
     return engine.state.thief, engine.state.cop
+
+
+def _state(engine: GameEngine, role: Role, enrich_cop: bool) -> tuple[int, ...]:
+    """Encode ``role``'s Q-state — the Cop's may be enriched (ADR-0004)."""
+    if role is Role.COP:
+        return cop_state(engine, enrich_cop)
+    own, target = _own_target(engine, role)
+    return encode_state(own, target)
+
+
+def _corner_start(engine: GameEngine, rng) -> tuple[Position, Position]:
+    """Curriculum start: Thief in a corner, Cop toward the centre (ADR-0004)."""
+    w, h = engine.rules.grid_width, engine.rules.grid_height
+    corners = [(0, 0), (0, h - 1), (w - 1, 0), (w - 1, h - 1)]
+    cx, cy = corners[int(rng.integers(len(corners)))]
+    mx, my = (w - 1) / 2, (h - 1) / 2
+    cop = Position(cx + (2 if cx < mx else -2), cy + (2 if cy < my else -2))
+    return cop, Position(cx, cy)
 
 
 def legal_indices(engine: GameEngine, role: Role, actions: list[str]) -> list[int]:
@@ -64,38 +83,52 @@ def _reward(role: Role, outcome: Outcome, cfg: dict) -> float:
     return r
 
 
-def run_episode(engine: GameEngine, tables: dict, acts: dict, cfg: dict, rng) -> tuple[float, float]:
-    """Play one self-play episode, updating both tables; return total rewards."""
+def run_episode(engine: GameEngine, tables: dict, acts: dict, cfg: dict, rng,
+                shaping_weight: float = 0.0, enrich_cop: bool = False,
+                corner: bool = False) -> tuple[float, float]:
+    """Play one self-play episode, updating both tables; return total rewards.
+
+    ``shaping_weight`` adds PBRS to the Cop's reward, ``enrich_cop`` appends the
+    escape-bucket to its state, ``corner`` starts the Thief cornered (ADR-0004).
+    With all three at their defaults the behaviour is byte-identical to before.
+    """
     w, h = engine.rules.grid_width, engine.rules.grid_height
-    cop = Position(int(rng.integers(w)), int(rng.integers(h)))
-    thief = Position(int(rng.integers(w)), int(rng.integers(h)))
-    while thief == cop:
+    if corner:
+        cop, thief = _corner_start(engine, rng)
+    else:
+        cop = Position(int(rng.integers(w)), int(rng.integers(h)))
         thief = Position(int(rng.integers(w)), int(rng.integers(h)))
+        while thief == cop:
+            thief = Position(int(rng.integers(w)), int(rng.integers(h)))
     engine.reset(cop=cop, thief=thief)
 
+    gamma = cfg["gamma"]
     totals = {Role.COP: 0.0, Role.THIEF: 0.0}
     for _ in range(engine.rules.max_moves + 1):
         if engine.state.is_terminal():
             break
         role = engine.state.turn
-        own, target = _own_target(engine, role)
-        s = encode_state(own, target)
+        s = _state(engine, role, enrich_cop)
         legal = legal_indices(engine, role, acts[role])
         a = tables[role].select(s, legal)
+        phi_before = potential(engine) if (role is Role.COP and shaping_weight) else 0.0
         _apply(engine, role, acts[role], a)
         reward = _reward(role, engine.state.outcome, cfg)
-        own_next, target_next = _own_target(engine, role)
-        tables[role].update(s, a, reward, encode_state(own_next, target_next))
+        if role is Role.COP and shaping_weight:
+            reward += shaping_weight * (gamma * potential(engine) - phi_before)
+        tables[role].update(s, a, reward, _state(engine, role, enrich_cop))
         totals[role] += reward
     return totals[Role.COP], totals[Role.THIEF]
 
 
-def train(rules: MatchRules, cfg: dict, episodes: int, seed: int = 0, out_dir: Path | None = None):
+def train(rules: MatchRules, cfg: dict, episodes: int, seed: int = 0,
+          out_dir: Path | None = None, shaping_weight: float = 0.0,
+          enrich_cop: bool = False, corner_fraction: float = 0.0):
     """Train Cop + Thief tables over ``episodes`` self-play games.
 
     Returns ``(cop_table, thief_table, history)`` where history is a list of
     ``(cop_reward, thief_reward)`` per episode. Persists tables + curve if
-    ``out_dir`` is given.
+    ``out_dir`` is given. Shaping/enrichment/curriculum default OFF.
     """
     rng = np.random.default_rng(seed)
     acts = {Role.COP: action_space(Role.COP), Role.THIEF: action_space(Role.THIEF)}
@@ -108,7 +141,9 @@ def train(rules: MatchRules, cfg: dict, episodes: int, seed: int = 0, out_dir: P
     engine = GameEngine(rules)
     history: list[tuple[float, float]] = []
     for _ in range(episodes):
-        history.append(run_episode(engine, tables, acts, cfg, rng))
+        corner = corner_fraction > 0 and rng.random() < corner_fraction
+        history.append(run_episode(engine, tables, acts, cfg, rng,
+                                   shaping_weight, enrich_cop, corner))
         tables[Role.COP].decay()
         tables[Role.THIEF].decay()
 
