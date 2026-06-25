@@ -28,7 +28,7 @@ def test_canonical_json_is_sorted_compact() -> None:
 def test_commit_reveal_roundtrip_and_seed() -> None:
     nonce = cr.generate_nonce()
     assert cr.verify(nonce, cr.commitment(nonce))
-    assert not cr.verify("wrong", cr.commitment(nonce))
+    assert not cr.verify(cr.generate_nonce(), cr.commitment(nonce))  # different nonce
     seed = cr.derive_seed("aa", "bb", 1, ruleset_hash())
     assert seed == cr.derive_seed("aa", "bb", 1, ruleset_hash())  # deterministic
 

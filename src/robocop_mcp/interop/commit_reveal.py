@@ -26,13 +26,23 @@ from ..domain.models import Position
 
 
 def generate_nonce() -> str:
-    """A fresh random secret nonce as hex (hex-decodable for the seed payload)."""
-    return secrets.token_hex(16)
+    """A fresh secret nonce: 64 hex chars (32 bytes).
+
+    Length matches the opponent's validator (``reveal_nonce`` requires ≥64 hex);
+    the seed uses the raw bytes, so both sides agree as long as each uses its own
+    full nonce value.
+    """
+    return secrets.token_hex(32)
 
 
 def commitment(nonce: str) -> str:
-    """Public commitment = raw hex SHA-256 of the nonce (sent before reveal)."""
-    return hashlib.sha256(nonce.encode("utf-8")).hexdigest()
+    """Public commitment = SHA-256 of the nonce's RAW BYTES (Team B, verified live).
+
+    Their ``reveal_nonce`` hashes ``bytes.fromhex(nonce)`` (consistent with the
+    seed, which also hex-decodes nonces), NOT the hex string — confirmed by their
+    server returning ``verified`` for this scheme and rejecting the hex-string one.
+    """
+    return hashlib.sha256(bytes.fromhex(nonce)).hexdigest()
 
 
 def verify(nonce: str, claimed_commitment: str) -> bool:

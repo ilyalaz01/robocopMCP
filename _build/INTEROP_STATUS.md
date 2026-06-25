@@ -58,8 +58,23 @@ All four critical items now match Team B's confirmed spec exactly (golden tests 
 | **placement** | `random.Random(bytes.fromhex(seed))`; rank-major cells `a1..e5` (files faster); `cop=choice`, `robber=choice(others)` |
 | **result/report hash** | `sha256( json.dumps(report, sort_keys=True, separators=(",",":")).encode() ).hexdigest()` — raw 64-hex, **no prefix**; `mutual_agreement` excluded before hashing |
 
-Minor (consistent with the above, confirm only if their report embeds them): the commitment is
-`sha256(nonce.utf8)` raw hex, and each sub-game `log_hash` uses the same raw-hex canonical hash.
+### Live-discovered against vm__fabi's server (2026-06-26) — aligned
+
+- Their endpoint is **`/sse`**; auth param is **`auth_token`**; tools take positional fields
+  (`confirm_role_schedule(schedule_json)`, `start_sub_game(cop_pos, robber_pos)`); their tool
+  set is reduced (`propose_ruleset` is the ruleset agreement — no `accept_ruleset`/
+  `exchange_team_identity`); responses come as JSON **text content** (`.data` is null).
+- **nonce length** = **64 hex chars (32 bytes)** — their `reveal_nonce` rejects shorter. FIXED.
+- **commitment** = `sha256(bytes.fromhex(nonce))` (hash of RAW BYTES, not the hex string) —
+  their `reveal_nonce` returns `verified` for this and rejects the hex-string scheme. FIXED.
+- **propose_ruleset → `accepted`** for `cop-robber-grid-v1` / `a0df8e78…` — **ruleset hash
+  agrees**. role schedule + integrity → `confirmed`.
+
+**Remaining for a live match (bidirectional P2P):** their tools record our data but return only
+status (no echo of their nonce), so the shared seed requires THEIR server to call OUR
+`commit_nonce`/`reveal_nonce` (and drive turns via `receive_action_message`). That needs our
+current public URL + token configured on their side and both servers up. The handshake in the
+our→their direction is fully working.
 
 ## ⚠️ Other items needing Ilya / opponent before a live run
 - **Opponent MCP URLs + token**, and our public URLs (deploy) — exchange checklist in
