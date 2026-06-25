@@ -63,9 +63,16 @@ class MatchSession:
         return ok
 
     def start_positions(self, sub_game_index: int) -> tuple[Position, Position]:
-        """Derive (Cop, Robber) start cells from both nonces (commit-reveal)."""
-        seed = derive_seed(self.our_nonces[sub_game_index], self.opp_nonces[sub_game_index],
-                           sub_game_index, self.ruleset_hash)
+        """Derive (Cop, Robber) start cells from both nonces (commit-reveal).
+
+        Nonces are ordered Team A then Team B (bit-exact: ``nonce_A`` is the
+        lexicographically smaller team's), so both sides derive the same seed.
+        """
+        from .capability_handshake import normalize_team
+        we_are_a = normalize_team(self.our_team) == normalize_team(self.team_a)
+        ours, opp = self.our_nonces[sub_game_index], self.opp_nonces[sub_game_index]
+        nonce_a, nonce_b = (ours, opp) if we_are_a else (opp, ours)
+        seed = derive_seed(nonce_a, nonce_b, sub_game_index, self.ruleset_hash)
         return seed_to_positions(seed, self.rules.grid_width, self.rules.grid_height)
 
     def our_role(self, sub_game_index: int) -> Role:

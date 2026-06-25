@@ -18,8 +18,11 @@ TOKEN = "tok"
 
 def test_canonical_json_is_sorted_compact() -> None:
     assert canonical_json({"b": 1, "a": 2}) == '{"a":2,"b":1}'
-    assert hash_payload({"a": 1}).startswith("sha256:")
-    assert ruleset_hash() == ruleset_hash()  # deterministic
+    # Bit-exact (Team B): raw lowercase hex, 64 chars, NO "sha256:" prefix.
+    h = hash_payload({"a": 1})
+    assert len(h) == 64 and h == h.lower() and not h.startswith("sha256:")
+    # ruleset_hash = SHA-256 of cop_rob_game_rules.md as-is (confirmed value).
+    assert ruleset_hash() == "a0df8e78a545501805496d36110fa6e2850d073d72639632a3abac354fc35140"
 
 
 def test_commit_reveal_roundtrip_and_seed() -> None:
@@ -28,6 +31,35 @@ def test_commit_reveal_roundtrip_and_seed() -> None:
     assert not cr.verify("wrong", cr.commitment(nonce))
     seed = cr.derive_seed("aa", "bb", 1, ruleset_hash())
     assert seed == cr.derive_seed("aa", "bb", 1, ruleset_hash())  # deterministic
+
+
+def test_seed_bit_exact_golden() -> None:
+    import hashlib
+
+    na, nb = "00112233445566778899aabbccddeeff", "ffeeddccbbaa99887766554433221100"
+    rh = ruleset_hash()
+    payload = (bytes.fromhex(na) + bytes.fromhex(nb) + (2).to_bytes(4, "big")
+               + rh.lower().encode("utf-8"))
+    assert cr.derive_seed(na, nb, 2, rh) == hashlib.sha256(payload).hexdigest()
+
+
+def test_placement_matches_python_random() -> None:
+    import random
+
+    from robocop_mcp.domain.models import Position
+    seed = cr.derive_seed("aa", "bb", 1, ruleset_hash())
+    rng = random.Random(bytes.fromhex(seed))
+    cells = [Position(x, y) for y in range(5) for x in range(5)]  # rank-major
+    cop = rng.choice(cells)
+    robber = rng.choice([c for c in cells if c != cop])
+    assert cr.seed_to_positions(seed) == (cop, robber)
+
+
+def test_ruleset_hash_equals_file_hash() -> None:
+    from robocop_mcp.interop.hashing import file_ruleset_hash
+    from robocop_mcp.shared.config import ConfigManager
+    rules_file = ConfigManager().root / "_build" / "opponent" / "cop_rob_game_rules.md"
+    assert ruleset_hash() == file_ruleset_hash(rules_file)
 
 
 def test_seed_to_positions_disjoint_and_in_bounds() -> None:
@@ -77,5 +109,5 @@ def test_commit_reveal_tools_and_capabilities() -> None:
     svc.exchange_team_identity(TOKEN, "Team-Beta")
     caps = svc.get_capabilities(TOKEN)["capabilities"]
     assert caps["role_flexible"] is True and caps["ruleset_name"] == "cop-robber-grid-v1"
-    commit = svc.commit_nonce(TOKEN, 1, "sha256:opp")["our_commitment"]
-    assert commit.startswith("sha256:")
+    commit = svc.commit_nonce(TOKEN, 1, "opp-commitment")["our_commitment"]
+    assert len(commit) == 64 and not commit.startswith("sha256:")  # raw hex, no prefix
