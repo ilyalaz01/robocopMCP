@@ -38,5 +38,19 @@ def make_peer_server(session: MatchSession, token: str, repo_url: str = "",
 
 def run_peer_server(team_name: str, token: str, host: str = "127.0.0.1",
                     port: int = 8101) -> None:  # pragma: no cover - network entry point
-    """Start the interop peer server for ``team_name`` on host:port."""
-    make_peer_server(MatchSession(team_name), token).run(transport="http", host=host, port=port)
+    """Start the interop peer server for ``team_name`` on host:port.
+
+    Pre-sets the opponent from config (``vm__fabi``) so A/B role ordering and the
+    report team names are correct even before the opponent calls exchange_team_identity.
+    """
+    import json
+    from pathlib import Path
+    session = MatchSession(team_name)
+    try:
+        opp = json.loads((Path(__file__).resolve().parents[3] / "config"
+                          / "config_interop.json").read_text()).get("opponent", {})
+        if opp.get("team"):
+            session.set_opponent(opp["team"])
+    except (OSError, json.JSONDecodeError, KeyError):
+        pass
+    make_peer_server(session, token).run(transport="http", host=host, port=port)

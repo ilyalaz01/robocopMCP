@@ -39,6 +39,8 @@ async def dispatch(service, body: dict, allowed) -> dict:
 
     method = body.get("method")
     params = body.get("params") or {}
+    if method in ("tools/list", "list_tools"):  # discovery — avoids blind "unknown method"
+        return {"result": {"tools": sorted(allowed)}}
     if method == "tools/call":  # standard MCP shape
         name, args = params.get("name"), (params.get("arguments") or {})
     else:  # direct shape: method = tool name

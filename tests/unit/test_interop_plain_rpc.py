@@ -61,7 +61,46 @@ def test_start_sub_game_via_rpc_stores_opponent_and_game() -> None:
     assert svc.s.opponent_url == "https://x/mcp" and svc.s.opponent_token == "ot"
 
 
-def test_take_turn_requires_opponent_and_game() -> None:
-    svc = _svc()  # no sub-game started, no opponent url
+def test_take_turn_no_opponent_when_no_url_anywhere(monkeypatch) -> None:
+    svc = _svc()  # no opponent on session; force empty config fallback too
+    monkeypatch.setattr("robocop_mcp.interop.turn_fallback.opponent_fallback",
+                        lambda: (None, None))
     out = asyncio.run(svc.take_turn(TOKEN, 1, 0, "cop"))
     assert out["ok"] is False and out["error"] == "no_opponent_url"
+
+
+def test_take_turn_calls_receive_action_once_no_recursion(monkeypatch) -> None:
+    """One take_turn → exactly one outbound receive_action_message, never their take_turn."""
+    svc = _svc()
+    svc.s.opponent_url, svc.s.opponent_token = "https://x/mcp", "ot"
+    calls: list[str] = []
+
+    class FakeClient:
+        def __init__(self, url, token) -> None:
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *exc):
+            return False
+
+        async def receive_action_message(self, *a):
+            calls.append("receive_action_message")
+            return {"terminal": None, "outcome": "ongoing"}
+
+        async def take_turn(self, *a):  # must never be reached (would recurse)
+            calls.append("take_turn")
+            return {}
+
+    monkeypatch.setattr("robocop_mcp.interop.their_client.TheirClient", FakeClient)
+    out = asyncio.run(svc.take_turn(TOKEN, 1, 0, "cop"))
+    assert out["ok"] is True
+    assert calls == ["receive_action_message"]  # exactly one call, no recursion
+
+
+def test_rpc_lists_tools_including_take_turn() -> None:
+    svc = _svc()
+    out = _disp(svc, {"method": "tools/list", "params": {}})
+    assert "take_turn" in out["result"]["tools"]
+    assert "receive_action_message" in out["result"]["tools"]

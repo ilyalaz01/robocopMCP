@@ -105,15 +105,18 @@ class PeerToolService:
         err = self._auth(token)
         if err:
             return err
+        from .turn_fallback import ensure_sub_game, opponent_fallback
         url = opponent_url or self.s.opponent_url
         tok = opponent_token or self.s.opponent_token
+        if not url:  # bare smoke: fall back to the opponent endpoint from config
+            url, fb_tok = opponent_fallback()
+            tok = tok or fb_tok
         if not url:
             return {"ok": False, "error": "no_opponent_url"}
-        if self.s.agent.game is None:
-            return {"ok": False, "error": "no_active_sub_game"}
-        message, code = self.s.agent.act()  # our action on our own state
+        ensure_sub_game(self.s.agent, actor, self.s.rules)  # lazy default game for bare calls
+        message, code = self.s.agent.act()  # decide OUR move on our own state
         from .their_client import TheirClient
-        async with TheirClient(url, tok) as their:
+        async with TheirClient(url, tok) as their:  # deliver to THEIR receive_action_message
             their_resp = await their.receive_action_message(
                 sub_game_index, round_index, STR_FROM_ROLE[self.s.agent.role], message)
         return {"ok": True, "our_message": message, "our_terminal": code,

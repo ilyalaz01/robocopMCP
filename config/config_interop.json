@@ -41,6 +41,12 @@
     "auth_token_env": "ROBOCOP_INTEROP_TOKEN",
     "default_token": "il-nv-ai-interop-token"
   },
+  "opponent": {
+    "team": "vm__fabi",
+    "url": "https://cop-rob-player-agent-78e1.onrender.com/mcp",
+    "token": "7ace7de6a23f92158f1d698ce1f98e1f48f7caf724e0bec5edbb7a6cf8022b5b",
+    "note": "their public MCP endpoint + shared auth_token; used as take_turn outbound fallback when start_sub_game did not supply opponent_url/token"
+  },
   "email_report": {
     "enabled": true,
     "recipient": "rmisegal+uoh26b@gmail.com",
