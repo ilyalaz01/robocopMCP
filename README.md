@@ -96,10 +96,17 @@ URLs, so the same code runs locally or against another team's servers for the bo
 
 A full **negotiated 6-sub-game series with real Haiku** (`scripts/run_demo.py`) produces the
 artifacts under `results/solo_demo/` (solo profile) and `results/bonus_demo/` (bonus profile)
-— transcript, negotiation, board PNGs, run summary, and the dry-run report — at a few cents
+— transcript, negotiation, board PNGs, run summary, and the JSON report — at a few cents
 total (tokens logged). With **varied per-sub-game starts** the six games now genuinely differ
 (distinct trajectories, and a mix of cop and thief wins) instead of the same game replayed
 six times. The `bonus_demo` transcript shows **truthful** messages under full visibility.
+
+**Submission status (both reports emailed live to `rmisegal+uoh26b@gmail.com`):**
+- **Solo internal report** — sent via Gmail OAuth (`scripts/send_report.py`), message_id
+  `19effc1704daaae3`.
+- **Inter-team bonus match vs `vm__fabi`** — completed (6 sub-games, **75–75 draw**,
+  `mutual_agreement=true`, agreed report hash `393b81f3…`); both teams emailed the identical
+  JSON (ours `19f015becb6345fb`, theirs `19f015dc2970c0e8`). Full evidence in `results/interop/`.
 
 | Learning curves | Q vs heuristic | Parameter sensitivity |
 | --- | --- | --- |
@@ -114,7 +121,8 @@ six times. The `bonus_demo` transcript shows **truthful** messages under full vi
   boards; capture takes longer.
 - Exploration **ε ≈ 0.2** is optimal; barriers and higher **γ** favour the Cop.
 - Larger `vision_radius` raises observability, reducing reliance on the language channel.
-- API cost is **near-zero** (Haiku, ~150 tokens/turn) — see the token-cost figure.
+- API cost is **near-zero**: the full solo + host-bonus runs total **$0.17** (684 Haiku calls,
+  92k in / 16k out tokens) — see the token-cost figure and `docs/COST_ANALYSIS.md`.
 
 **Proof of real MCP communication** — a slice of `results/solo_demo/events.jsonl`
 (244 `tool_call`, 54 `state`, 48 `turn` events for one series):

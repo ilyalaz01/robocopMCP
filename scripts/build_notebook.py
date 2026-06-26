@@ -78,14 +78,24 @@ plt.title("Observation sensitivity: vision_radius (5x5)"); plt.grid(alpha=0.3)
 plt.tight_layout(); plt.savefig(ASSETS / "vision_coverage.png", dpi=120); plt.show()
 """
 
-COST = """from robocop_mcp.reporting.summary import token_cost
-ev = ROOT / "results" / "solo_demo" / "events.jsonl"
-ev = ev if ev.exists() else ROOT / "logs" / "events.jsonl"
-cost = token_cost(ev); print(cost)
-fig, ax = plt.subplots(figsize=(6, 4))
-ax.bar(["input", "output"], [cost["input_tokens"], cost["output_tokens"]],
-       color=["#1f77b4", "#d62728"]); ax.set_ylabel("tokens")
-ax.set_title(f"Token usage — total ${cost['cost_usd']} at Haiku rates ($1/$5 per M)")
+COST = """import json
+# Real per-run costs live in each run's summary.json. WHY not events.jsonl: the
+# committed event stream is trimmed and omits the api_call token records, so mining
+# it would under-count to zero — summary.json is the authoritative cost source. §10.
+def _cost(name):
+    return json.loads((ROOT / "results" / name / "summary.json").read_text())["cost"]
+solo, bonus = _cost("solo_demo"), _cost("bonus_demo")
+total = {k: round(solo[k] + bonus[k], 6) for k in solo}
+print("solo :", solo); print("bonus:", bonus); print("total:", total)
+runs = ["solo", "bonus", "total"]
+ins = [solo["input_tokens"], bonus["input_tokens"], total["input_tokens"]]
+outs = [solo["output_tokens"], bonus["output_tokens"], total["output_tokens"]]
+x = np.arange(len(runs)); w = 0.38
+fig, ax = plt.subplots(figsize=(7, 4))
+ax.bar(x - w / 2, ins, w, label="input", color="#1f77b4")
+ax.bar(x + w / 2, outs, w, label="output", color="#d62728")
+ax.set_xticks(x); ax.set_xticklabels(runs); ax.set_ylabel("tokens"); ax.legend()
+ax.set_title(f"Token usage by run — total ${total['cost_usd']} at Haiku rates ($1/$5 per M)")
 plt.tight_layout(); plt.savefig(ASSETS / "token_cost.png", dpi=120); plt.show()
 """
 

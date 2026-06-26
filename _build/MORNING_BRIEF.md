@@ -7,8 +7,10 @@
 > canonical hash `393b81f31a258c7832d6a149085820f75d0f1458a99026142eab0304f62941e2`
 > (`mutual_agreement=true`), both teams emailed the report (ours `19f015becb6345fb`, theirs
 > `19f015dc2970c0e8`). The "Cloud deploy + run the bonus match" hand-off below is **DONE** —
-> see `results/interop/` and `_build/INTEROP_STATUS.md` for full evidence. The text below
-> records the pre-match state.
+> see `results/interop/` and `_build/INTEROP_STATUS.md` for full evidence.
+> **Also DONE: the solo internal report was emailed live** via Gmail OAuth
+> (`scripts/send_report.py`, dry_run=False) — message_id `19effc1704daaae3`, `sent: true`
+> (resolves Phase-11 item #2 below). The text below records the pre-send state.
 
 ---
 

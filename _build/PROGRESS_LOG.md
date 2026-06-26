@@ -48,8 +48,10 @@ adaptations + bit-exact items) — written in PRIORITY 3.
 
 **Gate:** ruff 0; **203 passed**; **coverage 91.6%**; all files ≤ 150 LOC. Solo/bonus untouched.
 
-**Note:** Gmail live send timed out waiting on browser consent (no token.json); infra ready,
-re-run `scripts/send_report.py` and complete consent. (Separate from interop.)
+**Note:** ~~Gmail live send timed out waiting on browser consent (no token.json); infra ready,
+re-run `scripts/send_report.py` and complete consent.~~ **UPDATE 2026-06-26: RESOLVED — the solo
+internal report WAS sent live via Gmail (`scripts/send_report.py`, dry_run=False); Gmail
+message_id `19effc1704daaae3`, `sent: true`.** (Separate from interop.)
 
 **Done (interop finalize — gated, never auto-send)**
 - `interop/finalize.py`: after 6 sub-games, build `results/interop/report_bonus.json`
