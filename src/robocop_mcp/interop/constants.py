@@ -22,6 +22,15 @@ DIR_TO_WORD: dict[Direction, str] = {
     Direction.NW: "left-up diagonal",
 }
 WORD_TO_DIR: dict[str, Direction] = {word: d for d, word in DIR_TO_WORD.items()}
+# Opponent (vm__fabi) declares diagonals WITHOUT the literal "diagonal" token, e.g.
+# "up-right" for NE. Register these short synonyms so the parser does not degrade a
+# diagonal to a cardinal — the root of the SG1-ply0 board desync. Longest-match in
+# translation.parse_action keeps "up-right" (len 8) from collapsing to "right" (len 5).
+DIAGONAL_SYNONYMS: dict[str, Direction] = {
+    "up-right": Direction.NE, "right-down": Direction.SE,
+    "down-left": Direction.SW, "left-up": Direction.NW,
+}
+WORD_TO_DIR.update(DIAGONAL_SYNONYMS)
 
 PLACE_BLOCK_PHRASE = "I place a block."
 LOSS_ADMISSION_PHRASE = "I've lost the game."

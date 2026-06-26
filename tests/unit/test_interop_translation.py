@@ -28,6 +28,26 @@ def test_parse_longest_direction_match() -> None:
     assert t.parse_action("I move down-left diagonal to a1.")["direction"] is Direction.SW
 
 
+def test_parse_opponent_short_and_full_diagonals() -> None:
+    """vm__fabi omits the 'diagonal' token; both short + full forms must parse right."""
+    t = Translator()
+    cases = {
+        # cardinals
+        "I move up.": Direction.N, "I move down.": Direction.S,
+        "I move right.": Direction.E, "I move left.": Direction.W,
+        # their SHORT diagonals (no 'diagonal' word) — must NOT collapse to a cardinal
+        "I move up-right.": Direction.NE, "I move right-down.": Direction.SE,
+        "I move down-left.": Direction.SW, "I move left-up.": Direction.NW,
+        # the full phrases still work
+        "I move up-right diagonal to b4.": Direction.NE,
+        "I move right-down diagonal to c2.": Direction.SE,
+        "I move down-left diagonal.": Direction.SW,
+        "I move left-up diagonal.": Direction.NW,
+    }
+    for msg, expected in cases.items():
+        assert t.parse_action(msg)["direction"] is expected, msg
+
+
 def test_parse_block_loss_unclear() -> None:
     t = Translator()
     assert t.parse_action("I place a block.")["type"] == "block"

@@ -38,7 +38,11 @@ class Translator:
         self.profile = profile or OpponentProfile()
         self._word_to_dir = {w.lower(): d for w, d in
                              {v: k for k, v in self.profile.dir_to_word.items()}.items()}
-        # Longest phrases first so "up-right diagonal" wins over "up"/"right".
+        # Add the opponent's short diagonal synonyms ("up-right" = NE) without
+        # overriding any profile word, so terse diagonals don't degrade to cardinals.
+        for word, direction in WORD_TO_DIR.items():
+            self._word_to_dir.setdefault(word.lower(), direction)
+        # Longest phrases first so "up-right diagonal"/"up-right" win over "up"/"right".
         self._phrases = sorted(self._word_to_dir, key=len, reverse=True)
 
     # --- coordinates (non-authoritative) --------------------------------
