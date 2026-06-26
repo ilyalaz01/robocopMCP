@@ -1,5 +1,16 @@
 # INTEROP STATUS — P2P inter-team agent
 
+> **✅ UPDATE 2026-06-26 — LIVE BONUS MATCH PLAYED & AGREED.** The bidirectional P2P
+> match against **vm__fabi** was run to completion (6 sub-games) against their live server
+> (`https://cop-rob-player-agent-78e1.onrender.com/mcp`). Result: **75–75 draw** (bonus 5/5
+> each). Both teams independently computed and agreed the canonical report hash
+> `393b81f31a258c7832d6a149085820f75d0f1458a99026142eab0304f62941e2`
+> (`mutual_agreement=true`) and emailed the JSON report (ours `19f015becb6345fb`, theirs
+> `19f015dc2970c0e8`). **The "Remaining for a live match" / "needing Ilya before a live run"
+> items below are now RESOLVED** — they record the pre-match state. Full evidence:
+> `results/interop/` (`report_bonus.json`, `SUMMARY.md`, `SUBGAMES.md`, `HANDSHAKE_LOG.md`,
+> `INTEROP_SUMMARY.md`).
+
 **What this is:** an additive interop `PlayerAgent` (`src/robocop_mcp/interop/`) that speaks the
 opponent team's pure peer-to-peer protocol and **reuses our `GameEngine`**. The solo and
 host-bonus systems are **untouched** and remain the graded submission. Source of truth:

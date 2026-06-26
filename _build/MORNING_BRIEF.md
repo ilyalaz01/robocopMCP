@@ -2,6 +2,14 @@
 
 **Date:** 2026-06-25 · **Group:** il-nv-ai
 
+> **✅ UPDATE 2026-06-26 — INTER-TEAM BONUS MATCH COMPLETED.** The live P2P match vs
+> **vm__fabi** has since been played to completion: **75–75 draw** (bonus 5/5 each), agreed
+> canonical hash `393b81f31a258c7832d6a149085820f75d0f1458a99026142eab0304f62941e2`
+> (`mutual_agreement=true`), both teams emailed the report (ours `19f015becb6345fb`, theirs
+> `19f015dc2970c0e8`). The "Cloud deploy + run the bonus match" hand-off below is **DONE** —
+> see `results/interop/` and `_build/INTEROP_STATUS.md` for full evidence. The text below
+> records the pre-match state.
+
 ---
 
 ## TL;DR
