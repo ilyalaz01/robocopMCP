@@ -37,7 +37,7 @@ def _make_sim(session: MatchSession):
             game.admit_loss(role)
 
     class Their:
-        async def start_sub_game(self, index, role, cop_pos, robber_pos):
+        async def start_sub_game(self, index, role, cop_pos, robber_pos, **kw):
             st["role"] = ROLE_FROM_STR[role]
             g = InteropGame(rules)
             g.start(Position(*T.coord_to_cell(cop_pos)), Position(*T.coord_to_cell(robber_pos)))

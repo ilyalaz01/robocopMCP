@@ -68,9 +68,33 @@ class TheirClient:
     async def confirm_integrity_promise(self, message: str) -> dict:
         return await self._call("confirm_integrity_promise", message=message)
 
-    async def start_sub_game(self, index: int, role: str, cop_pos: str, robber_pos: str) -> dict:
+    async def start_sub_game(self, index: int, role: str, cop_pos: str, robber_pos: str,
+                             opponent_url: str | None = None,
+                             opponent_token: str | None = None) -> dict:
+        kw: dict = {}
+        if opponent_url:  # tell them where to push their moves (our callable server)
+            kw["opponent_url"] = opponent_url
+        if opponent_token:
+            kw["opponent_token"] = opponent_token
         return await self._call("start_sub_game", sub_game_index=index, role=role,
-                                cop_pos=cop_pos, robber_pos=robber_pos)
+                                cop_pos=cop_pos, robber_pos=robber_pos, **kw)
+
+    async def take_turn(self, index: int, rnd: int, actor: str,
+                        opponent_url: str | None = None,
+                        opponent_token: str | None = None) -> dict:
+        """Trigger THEIR move; their server pushes it back to our receive_action_message."""
+        kw: dict = {}
+        if opponent_url:
+            kw["opponent_url"] = opponent_url
+        if opponent_token:
+            kw["opponent_token"] = opponent_token
+        return await self._call("take_turn", sub_game_index=index, round_index=rnd,
+                                actor=actor, **kw)
+
+    async def choose_action(self, index: int, rnd: int, actor: str) -> dict:
+        """Pull THEIR move synchronously: returns {"message": "<their action text>"}."""
+        return await self._call("choose_action", sub_game_index=index,
+                                round_index=rnd, actor=actor)
 
     async def receive_action_message(self, index: int, rnd: int, actor: str, message: str) -> dict:
         return await self._call("receive_action_message", sub_game_index=index,

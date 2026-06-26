@@ -31,6 +31,10 @@ from robocop_mcp.interop.their_client import TheirClient
 OUR_TEAM = "il-nv-ai"
 OUR_TOKEN = os.environ.get("ROBOCOP_INTEROP_TOKEN", "il-nv-ai-interop-token")
 PORT = int(os.environ.get("PORT", "8101"))
+# Our PUBLIC callable endpoint (the cloudflared tunnel) — passed to the opponent so
+# their take_turn pushes their moves back to our receive_action_message.
+OUR_PUBLIC_URL = os.environ.get(
+    "OUR_PUBLIC_URL", "https://vic-spatial-duo-formula.trycloudflare.com/mcp")
 
 
 async def _await_opponent(game, timeout: float) -> bool:
@@ -46,16 +50,16 @@ async def _await_opponent(game, timeout: float) -> bool:
 
 
 async def _exchange_nonce(session: MatchSession, their: TheirClient, index: int) -> None:
-    """Send our nonce for sub-game ``index`` and wait for theirs to reach our server."""
+    """Send our nonce for sub-game ``index``; read THEIR nonce from the reveal response."""
     nonce = generate_nonce()
     session.our_nonces[index] = nonce
     await their.commit_nonce(index, commitment(nonce))
-    await their.reveal_nonce(index, nonce)
-    for _ in range(240):  # wait up to ~60s for their inbound reveal
-        if session.opp_nonces.get(index):
-            return
-        await asyncio.sleep(0.25)
-    raise SystemExit(f"opponent nonce for sub-game {index} not received — is our URL/token set on their side?")
+    resp = await their.reveal_nonce(index, nonce)
+    their_nonce = resp.get("nonce")
+    if not their_nonce:  # their server must return {"status":"verified","nonce":"<hex>"}
+        raise SystemExit(f"sub-game {index}: no 'nonce' field in their reveal_nonce response: {resp}")
+    session.opp_nonces[index] = their_nonce
+    print(f"SG{index} their nonce: {their_nonce}", flush=True)
 
 
 async def main(their_url: str, their_token: str, their_team: str) -> None:
@@ -79,7 +83,8 @@ async def main(their_url: str, their_token: str, their_team: str) -> None:
         match_info = {"their_repo": "", "their_cop_url": their_url, "their_thief_url": their_url,
                       "their_students": []}
         await run_match(session, their, starts, _await_opponent,
-                        match_info, Path("results/interop"))
+                        match_info, Path("results/interop"),
+                        our_url=OUR_PUBLIC_URL, our_token=OUR_TOKEN)
     server.should_exit = True
     await server_task
 

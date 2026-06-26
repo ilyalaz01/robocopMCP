@@ -2,14 +2,14 @@
   "report_type": "bonus_game",
   "groups": {
     "group_1": "il-nv-ai",
-    "group_2": "team-beta"
+    "group_2": "vm__fabi"
   },
   "github_repo_group_1": "https://github.com/ilyalaz01/robocopMCP",
   "github_repo_group_2": "",
   "mcp_url_group_1_cop": "",
   "mcp_url_group_1_thief": "",
-  "mcp_url_group_2_cop": "",
-  "mcp_url_group_2_thief": "",
+  "mcp_url_group_2_cop": "https://cop-rob-player-agent-78e1.onrender.com/mcp",
+  "mcp_url_group_2_thief": "https://cop-rob-player-agent-78e1.onrender.com/mcp",
   "timezone": "Asia/Jerusalem",
   "students_group_1": [
     {
@@ -23,7 +23,7 @@
   ],
   "students_group_2": [],
   "ruleset_name": "cop-robber-grid-v1",
-  "ruleset_hash": "sha256:290bf7b5bbc33a8fb358c1e8c137e1f01b9a793305f202a6d2c11cf1887f6918",
+  "ruleset_hash": "a0df8e78a545501805496d36110fa6e2850d073d72639632a3abac354fc35140",
   "role_schedule": {
     "sub_games_1_to_3": {
       "team_a": "cop",
@@ -44,17 +44,17 @@
         "cop": 20,
         "robber": 5
       },
-      "log_hash": "sha256:d9c653a3190d5a5149ecbdbd9b2957a0a9dd7c72df4c5a1884d09158ffd5fa3f"
+      "log_hash": "d9c653a3190d5a5149ecbdbd9b2957a0a9dd7c72df4c5a1884d09158ffd5fa3f"
     },
     {
       "sub_game_index": 2,
-      "terminal_reason": "cop_capture",
+      "terminal_reason": "robber_illegal_action",
       "winner_role": "cop",
       "scores": {
         "cop": 20,
         "robber": 5
       },
-      "log_hash": "sha256:18e9282dbd2974c7f01ff2c7aadc08f7786504e48f44a15464835e15f58cf8f6"
+      "log_hash": "287bdc29e44c606f3edd0a9c123e91e4dcdf01993ca2197859311583273f2d76"
     },
     {
       "sub_game_index": 3,
@@ -64,46 +64,46 @@
         "cop": 20,
         "robber": 5
       },
-      "log_hash": "sha256:48aa321f3df0a575c877fe1bb06af3979ce9bb987dd635ebc4c6ad37e06aca02"
+      "log_hash": "48aa321f3df0a575c877fe1bb06af3979ce9bb987dd635ebc4c6ad37e06aca02"
     },
     {
       "sub_game_index": 4,
-      "terminal_reason": "cop_capture",
-      "winner_role": "cop",
+      "terminal_reason": "cop_illegal_action",
+      "winner_role": "robber",
       "scores": {
-        "cop": 20,
-        "robber": 5
+        "cop": 5,
+        "robber": 10
       },
-      "log_hash": "sha256:579529dd4065ed463063555329575185cbdafd28fcc19833ed85048f3a046d32"
+      "log_hash": "eb6a9d9e06e381f3186b127cf9ec58784f2814765a86809eea90e5477bbf49f1"
     },
     {
       "sub_game_index": 5,
-      "terminal_reason": "cop_capture",
-      "winner_role": "cop",
+      "terminal_reason": "cop_illegal_action",
+      "winner_role": "robber",
       "scores": {
-        "cop": 20,
-        "robber": 5
+        "cop": 5,
+        "robber": 10
       },
-      "log_hash": "sha256:ccc03d056eb660d7b725ce7a28f7587f8aedcb619034617b729e3ee1eef537c7"
+      "log_hash": "dcdecec3fbae9810d7d6a1137edbbe2c5706be678336a9d732d746c9ee479b50"
     },
     {
       "sub_game_index": 6,
-      "terminal_reason": "cop_capture",
-      "winner_role": "cop",
+      "terminal_reason": "cop_illegal_action",
+      "winner_role": "robber",
       "scores": {
-        "cop": 20,
-        "robber": 5
+        "cop": 5,
+        "robber": 10
       },
-      "log_hash": "sha256:7d507810ae8b33c06a1f41b387fdcabbd447b0a55673f0b8230f87d745b5c591"
+      "log_hash": "5c193fa5c95aa9d82b5d55e03927a6bdb55ad6b39f31f19ff2e29abdcbd919bf"
     }
   ],
   "totals_by_group": {
-    "il-nv-ai": 75,
-    "team-beta": 75
+    "il-nv-ai": 90,
+    "vm__fabi": 30
   },
   "bonus_claim": {
-    "il-nv-ai": 5,
-    "team-beta": 5
+    "il-nv-ai": 10,
+    "vm__fabi": 7
   },
   "mutual_agreement": false
 }
