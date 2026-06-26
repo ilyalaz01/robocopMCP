@@ -16,7 +16,7 @@ from ..constants import Role
 from ..domain.models import Position
 from .capability_handshake import role_for
 from .constants import TERMINAL_CODES
-from .finalize import finalize
+from .finalize import build_bonus_report, comparable_hash, finalize
 from .game_adapter import STR_FROM_ROLE
 from .session import MatchSession
 
@@ -85,7 +85,20 @@ async def run_match(session: MatchSession, their, starts: list, await_opponent,
         await run_sub_game(session, their, index, role, cop, robber, await_opponent,
                            our_url=our_url, our_token=our_token)
 
+    # Final bit-exact agreement: push our results + pull their report hash (if their
+    # server exposes the tool); finalize compares it canonically and sets mutual_agreement.
+    opp_hash = None
+    if hasattr(their, "confirm_sub_game_result"):
+        import contextlib
+
+        from .report_exchange import fetch_opponent_report_hash, push_our_results
+        report = build_bonus_report(session, match_info)
+        with contextlib.suppress(Exception):
+            await push_our_results(their, report)
+        opp_hash = await fetch_opponent_report_hash(their, comparable_hash(report))
+        print(f"opponent report hash: {opp_hash}", flush=True)
+
     # NEVER auto-send: dry-run only — saves report_bonus.json + prints SHA256.
-    result = finalize(session, match_info, out_dir, send=False)
+    result = finalize(session, match_info, out_dir, send=False, opponent_report_hash=opp_hash)
     print("MATCH DONE. report_bonus.json SHA256:", result["hash"], "| sent:", result["sent"])
     return result

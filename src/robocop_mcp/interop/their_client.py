@@ -103,3 +103,11 @@ class TheirClient:
     async def confirm_sub_game_result(self, index: int, result_hash: str, result_json: dict) -> dict:
         return await self._call("confirm_sub_game_result", sub_game_index=index,
                                 result_hash=result_hash, result_json=json.dumps(result_json))
+
+    async def confirm_final_report(self, report_hash: str) -> dict:
+        """Send our report hash; their server returns their hash + agreement verdict."""
+        return await self._call("confirm_final_report", report_hash=report_hash)
+
+    async def get_final_report(self) -> dict:
+        """Pull the opponent's final report (so we can hash it canonically ourselves)."""
+        return await self._call("get_final_report")
