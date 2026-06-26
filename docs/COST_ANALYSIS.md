@@ -15,8 +15,11 @@ All token counts are measured, not estimated: the API Gatekeeper records
 | --- | --- | ---: | ---: | ---: | ---: | --- |
 | Solo series (6 sub-games, partial-obs, bluffing) | Haiku | 298 | 40,175 | 6,873 | **$0.074540** | `results/solo_demo/summary.json` |
 | Host-bonus demo (truthful, full-vis, 6 sub-games) | Haiku | 386 | 51,967 | 8,756 | **$0.095747** | `results/bonus_demo/summary.json` |
-| Inter-team bonus match vs vm__fabi | — (none) | 0 | 0 | 0 | **$0.000000** | see note below |
+| Inter-team bonus match vs vm__fabi | — (none) | 0 | 0 | 0 | **$0.000000** ⁽¹⁾ | see note below |
 | **TOTAL** | | **684** | **92,142** | **15,629** | **$0.170287** | |
+
+⁽¹⁾ **$0 is not a missing measurement:** the interop match used deterministic templates and
+the LLM was **not** called; NL-over-LLM is demonstrated in the solo run (real Haiku transcripts).
 
 Cross-check: `92,142 / 1e6 × $1` + `15,629 / 1e6 × $5` = `$0.092142 + $0.078145` = **$0.170287**.
 
