@@ -5,7 +5,7 @@
     "group_2": "vm__fabi"
   },
   "github_repo_group_1": "https://github.com/ilyalaz01/robocopMCP",
-  "github_repo_group_2": "",
+  "github_repo_group_2": "https://github.com/mironovich-v/cop-rob",
   "mcp_url_group_1_cop": "",
   "mcp_url_group_1_thief": "",
   "mcp_url_group_2_cop": "https://cop-rob-player-agent-78e1.onrender.com/mcp",
@@ -21,7 +21,16 @@
       "name": "Nadav Goldin"
     }
   ],
-  "students_group_2": [],
+  "students_group_2": [
+    {
+      "id": "345606545",
+      "name": "Vasily Mironovich"
+    },
+    {
+      "id": "211758149",
+      "name": "Fahed Bitar"
+    }
+  ],
   "ruleset_name": "cop-robber-grid-v1",
   "ruleset_hash": "a0df8e78a545501805496d36110fa6e2850d073d72639632a3abac354fc35140",
   "role_schedule": {
@@ -105,5 +114,5 @@
     "il-nv-ai": 5,
     "vm__fabi": 5
   },
-  "mutual_agreement": false
+  "mutual_agreement": true
 }
